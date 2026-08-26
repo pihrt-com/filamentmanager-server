@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace FilamentManager\Controllers;
+
+use FilamentManager\Core\App; use FilamentManager\Core\Csrf; use FilamentManager\Core\HttpException; use FilamentManager\Core\Request; use FilamentManager\Core\Response; use FilamentManager\Core\Session; use FilamentManager\Core\View; use FilamentManager\Services\AuditService; use FilamentManager\Services\BackupService; use FilamentManager\Services\FileSecurityService; use FilamentManager\Services\UpdateService;
+
+final class SettingsController
+{
+    public function __construct(private readonly App $app){}
+    public function index(Request $request):void{$this->app->auth()->requireRole('admin');$backup=new BackupService($this->app);$cachedFile=FM_ROOT.'/storage/cache/update.json';$update=is_file($cachedFile)?json_decode((string)file_get_contents($cachedFile),true):null;View::render('settings',['title'=>View::t('settings'),'backups'=>$backup->list(),'securityIssues'=>(new FileSecurityService())->audit(),'update'=>$update,'currentVersion'=>(new UpdateService($this->app))->currentVersion(),'basePath'=>$request->basePath()]);}
+    public function backup(Request $request):void{Csrf::verify($request);$this->app->auth()->requireRole('admin');$path=(new BackupService($this->app))->create();(new AuditService($this->app))->record('backup.created');header('Content-Type: application/zip');header('Content-Disposition: attachment; filename="'.basename($path).'"');header('Content-Length: '.filesize($path));header('Cache-Control: no-store');readfile($path);exit;}
+    public function restore(Request $request):void{Csrf::verify($request);$u=$this->app->auth()->requireRole('admin');$record=$this->app->db()->fetch('SELECT password_hash FROM users WHERE id=?',[$u['id']]);if(!$record||!password_verify((string)$request->input('password'),$record['password_hash']))throw new HttpException('Administrator password is incorrect',403);$file=$request->file('backup');if(!$file||($file['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_OK||($file['size']??0)>100*1024*1024)throw new HttpException('Invalid backup upload',422);(new BackupService($this->app))->create('pre-restore');(new BackupService($this->app))->restore($file['tmp_name']);if($this->app->db()->fetch('SELECT id FROM users WHERE id=?',[$u['id']]))(new AuditService($this->app))->record('backup.restored');$this->app->auth()->logout();Response::redirect($request->basePath().'/login');}
+    public function checkUpdate(Request $request):void{Csrf::verify($request);$this->app->auth()->requireRole('admin');try{$result=(new UpdateService($this->app))->check(true);Session::flash('success',$result['available']?View::t('new_version_available',['version'=>$result['latest']]):View::t('up_to_date'));}catch(\Throwable $e){throw new HttpException($e->getMessage(),502);}Response::redirect($request->basePath().'/admin/settings');}
+    public function installUpdate(Request $request):void{Csrf::verify($request);$u=$this->app->auth()->requireRole('admin');$record=$this->app->db()->fetch('SELECT password_hash FROM users WHERE id=?',[$u['id']]);if(!$record||!password_verify((string)$request->input('password'),$record['password_hash']))throw new HttpException('Administrator password is incorrect',403);$result=(new UpdateService($this->app))->install((string)$request->input('version'));(new AuditService($this->app))->record('server.updated',null,null,null,$result);Session::flash('success',View::t('updated_to_version',['version'=>$result['version']]));Response::redirect($request->basePath().'/admin/settings');}
+}

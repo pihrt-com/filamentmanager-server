@@ -1,0 +1,16 @@
+/.env
+/config/local.php
+/storage/backups/*
+!/storage/backups/.gitkeep
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/installed.lock
+/storage/maintenance.lock
+/storage/update-staging/
+/dist/
+/.idea/
+/.vscode/
+Thumbs.db
+.DS_Store

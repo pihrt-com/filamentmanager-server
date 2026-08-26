@@ -1,0 +1,14 @@
+Options -Indexes
+RewriteEngine On
+
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^(?:app|config|database|resources|routes|storage|tests|tools)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:README|CHANGELOG|LICENSE|VERSION)(?:\.|$) - [F,L,NC]
+RewriteRule ^assets/(.*)$ public/assets/$1 [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+<FilesMatch "^(?:\.env|local\.php|.*\.(?:log|sql|zip))$">
+    Require all denied
+</FilesMatch>

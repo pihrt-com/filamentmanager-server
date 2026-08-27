@@ -17,6 +17,8 @@ $usedKeys=[];
 $translationSources=array_merge(glob(FM_ROOT.'/resources/views/*.php')?:[],glob(FM_ROOT.'/app/Controllers/*.php')?:[]);
 foreach($translationSources as $sourceFile){$source=(string)file_get_contents($sourceFile);preg_match_all("/View::t\\('([^']+)'/",$source,$matches);$usedKeys=array_merge($usedKeys,$matches[1]);if(str_contains($sourceFile,'resources/views')&&(str_contains($source,'style=')||str_contains($source,'<script')))throw new RuntimeException('Strict CSP violation in '.basename($sourceFile));}
 foreach(array_unique($usedKeys) as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} translation: {$key}");
+$dynamicKeys=['role_admin','role_manager','role_operator','role_viewer','spool_status_in_stock','spool_status_loaded','spool_status_empty','spool_status_archived'];
+foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} dynamic translation: {$key}");
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
-foreach(['/materials/{id}/edit','/materials/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
+foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
 echo "Smoke tests passed.\n";

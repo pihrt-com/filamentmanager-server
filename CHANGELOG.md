@@ -4,6 +4,23 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-08-27
+
+### Added
+
+- Editing for storage locations and users, including optional password changes.
+- Signed-in user name and localized role in the application header.
+
+### Changed
+
+- Standardized action-button dimensions across links and form buttons.
+- Render cancel, logout, spool, and storage-location actions as buttons.
+- Localized user roles and spool statuses in Czech and English.
+
+### Fixed
+
+- Show storage-location and loaded-spool deletion conflicts as translated flash notices.
+
 ## [0.1.2] - 2026-08-27
 
 ### Added

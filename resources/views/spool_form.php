@@ -1,5 +1,5 @@
 <?php use FilamentManager\Core\View; ?>
-<div class="toolbar"><h1><?= View::e($title) ?></h1><a href="<?= View::e($basePath) ?>/spools"><?= View::t('cancel') ?></a></div>
+<div class="toolbar"><h1><?= View::e($title) ?></h1><a class="button secondary-button action-button" href="<?= View::e($basePath) ?>/spools"><?= View::t('cancel') ?></a></div>
 <form class="card" method="post" action="<?= View::e($basePath) ?><?= $spool ? '/spools/'.View::e($spool['id']) : '/spools' ?>">
 <?= View::csrf() ?>
 <?php if ($spool): ?><input type="hidden" name="version" value="<?= View::e($spool['version']) ?>"><?php endif; ?>

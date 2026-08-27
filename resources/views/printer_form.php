@@ -1,5 +1,5 @@
 <?php use FilamentManager\Core\View; $count=max(1,count($slots)); ?>
-<div class="toolbar"><h1><?= View::e($title) ?></h1><a href="<?= View::e($basePath) ?>/"><?= View::t('cancel') ?></a></div>
+<div class="toolbar"><h1><?= View::e($title) ?></h1><a class="button secondary-button action-button" href="<?= View::e($basePath) ?>/"><?= View::t('cancel') ?></a></div>
 <form class="card" method="post" action="<?= View::e($basePath) ?><?= $printer ? '/printers/'.View::e($printer['id']) : '/printers' ?>"><?= View::csrf() ?><?php if($printer): ?><input type="hidden" name="version" value="<?= View::e($printer['version']) ?>"><?php endif; ?>
 <div class="grid"><label><?= View::t('printer_name') ?><input name="name" required maxlength="120" value="<?= View::e($printer['name'] ?? '') ?>"></label><label><?= View::t('slots') ?><input name="slot_count" type="number" min="1" max="16" value="<?= View::e($count) ?>"></label></div>
 <div class="grid"><label><?= View::t('manufacturer') ?><input name="manufacturer" maxlength="120" value="<?= View::e($printer['manufacturer'] ?? '') ?>"></label><label><?= View::t('model') ?><input name="model" maxlength="120" value="<?= View::e($printer['model'] ?? '') ?>"></label></div>

@@ -45,9 +45,13 @@ $router->post('/materials/{id}', [MaterialController::class, 'save'], [$webUser]
 $router->post('/materials/{id}/delete', [MaterialController::class, 'delete'], [$webUser]);
 $router->get('/locations', [LocationController::class, 'index'], [$webUser]);
 $router->post('/locations', [LocationController::class, 'save'], [$webUser]);
+$router->get('/locations/{id}/edit', [LocationController::class, 'index'], [$webUser]);
+$router->post('/locations/{id}', [LocationController::class, 'save'], [$webUser]);
 $router->post('/locations/{id}/delete', [LocationController::class, 'delete'], [$webUser]);
 $router->get('/admin/users', [UserController::class, 'index'], [$admin]);
 $router->post('/admin/users', [UserController::class, 'save'], [$admin]);
+$router->get('/admin/users/{id}/edit', [UserController::class, 'index'], [$admin]);
+$router->post('/admin/users/{id}', [UserController::class, 'save'], [$admin]);
 $router->post('/admin/users/{id}/toggle', [UserController::class, 'toggle'], [$admin]);
 $router->post('/admin/users/{id}/delete', [UserController::class, 'delete'], [$admin]);
 $router->get('/admin/settings', [SettingsController::class, 'index'], [$admin]);

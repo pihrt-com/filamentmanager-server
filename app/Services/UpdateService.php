@@ -43,7 +43,7 @@ final class UpdateService
         $root=$extract;if(!is_file($root.'/VERSION')){$children=glob($extract.'/*',GLOB_ONLYDIR)?:[];if(count($children)===1)$root=$children[0];}
         if(trim((string)@file_get_contents($root.'/VERSION'))!==$expectedVersion)throw new RuntimeException('Update package version does not match.');
         file_put_contents(FM_ROOT.'/storage/maintenance.lock',gmdate('c'),LOCK_EX);
-        try{$this->copyRelease($root,FM_ROOT);Migrator::run($this->app->db()->pdo());}catch(\Throwable $updateError){try{$this->restoreApplicationFiles($filesBackup,$stage.'/rollback');}catch(\Throwable $rollbackError){throw new RuntimeException('Update failed and automatic file rollback also failed: '.$rollbackError->getMessage(),0,$updateError);}throw $updateError;}finally{@unlink(FM_ROOT.'/storage/maintenance.lock');$this->removeTree($stage);}
+        try{$this->copyRelease($root,FM_ROOT);Migrator::run($this->app->db()->pdo());@unlink(FM_ROOT.'/storage/cache/update.json');}catch(\Throwable $updateError){try{$this->restoreApplicationFiles($filesBackup,$stage.'/rollback');}catch(\Throwable $rollbackError){throw new RuntimeException('Update failed and automatic file rollback also failed: '.$rollbackError->getMessage(),0,$updateError);}throw $updateError;}finally{@unlink(FM_ROOT.'/storage/maintenance.lock');$this->removeTree($stage);}
         return ['version'=>$expectedVersion];
     }
 

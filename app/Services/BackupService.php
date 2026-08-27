@@ -75,7 +75,7 @@ final class BackupService
 
     public function list(): array
     {
-        $files=array_merge(glob(FM_ROOT.'/storage/backups/filamentmanager-backup-*.zip')?:[],glob(FM_ROOT.'/storage/backups/filamentmanager-files-*.zip')?:[]);rsort($files,SORT_STRING);return array_map(static fn($p)=>['name'=>basename($p),'size'=>filesize($p),'createdAt'=>gmdate('c',filemtime($p))],$files);
+        $files=glob(FM_ROOT.'/storage/backups/filamentmanager-backup-*.zip')?:[];rsort($files,SORT_STRING);return array_map(static fn($p)=>['name'=>basename($p),'size'=>filesize($p),'createdAt'=>gmdate('c',filemtime($p))],$files);
     }
 
     private function prune(int $keep): void

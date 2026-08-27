@@ -4,6 +4,13 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-27
+
+### Fixed
+
+- Recalculate cached update availability against the installed version and clear the cache after a successful update.
+- Keep internal application-file rollback archives out of the database-backup restore list.
+
 ## [0.1.0] - 2026-08-27
 
 ### Added

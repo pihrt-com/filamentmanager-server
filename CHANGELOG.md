@@ -24,3 +24,4 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Redirect unauthenticated browser requests to the sign-in page instead of rendering HTTP 401.
 - Load installer assets consistently through the public asset route in subdirectory deployments.
 - Handle an empty GitHub Releases list and show update-check failures inside Settings instead of returning a CDN-facing HTTP 502.
+- Build release archives correctly when the repository path contains Windows path separators.

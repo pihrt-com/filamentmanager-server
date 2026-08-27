@@ -12,8 +12,10 @@ New-Item -ItemType Directory -Path $staging|Out-Null
 try{
     $archiveRoot=Join-Path $staging ('filamentmanager-server-'+$Version)
     New-Item -ItemType Directory -Path $archiveRoot|Out-Null
-    git -C $projectRoot archive --format=zip --output=(Join-Path $staging 'source.zip') HEAD
-    Expand-Archive -LiteralPath (Join-Path $staging 'source.zip') -DestinationPath $archiveRoot
+    $sourceArchive=Join-Path $staging 'source.zip'
+    git -C $projectRoot archive --format=zip "--output=$sourceArchive" HEAD
+    if($LASTEXITCODE -ne 0){throw "git archive failed with exit code $LASTEXITCODE."}
+    Expand-Archive -LiteralPath $sourceArchive -DestinationPath $archiveRoot
     $zipPath=Join-Path $outputDir ('filamentmanager-server-'+$Version+'.zip')
     if(Test-Path -LiteralPath $zipPath){Remove-Item -LiteralPath $zipPath -Force}
     Compress-Archive -Path $archiveRoot -DestinationPath $zipPath -CompressionLevel Optimal

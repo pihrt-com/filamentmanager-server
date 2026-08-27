@@ -4,6 +4,22 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-08-27
+
+### Added
+
+- Material editing and administrator user deletion with device revocation and audit history preservation.
+
+### Changed
+
+- Render printer, material, user, and top-navigation actions as clear buttons with active-section highlighting.
+- Return expected form conflicts as translated flash notices instead of standalone HTTP error pages.
+
+### Fixed
+
+- Recalculate cached update availability on every dashboard request so the installed release is never advertised as newer.
+- Generate subdirectory-aware asset URLs for error layouts.
+
 ## [0.1.1] - 2026-08-27
 
 ### Fixed

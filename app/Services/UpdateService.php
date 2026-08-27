@@ -17,7 +17,7 @@ final class UpdateService
     public function check(bool $force=false): array
     {
         $cache=FM_ROOT.'/storage/cache/update.json';
-        if(!$force&&is_file($cache)&&filemtime($cache)>time()-(int)$this->app->config('update_check_interval',21600)){$cached=json_decode((string)file_get_contents($cache),true);if(is_array($cached))return $cached;}
+        if(!$force&&is_file($cache)&&filemtime($cache)>time()-(int)$this->app->config('update_check_interval',21600)){$cached=json_decode((string)file_get_contents($cache),true);if(is_array($cached)){$current=$this->currentVersion();$cached['current']=$current;$cached['available']=($cached['published']??true)&&isset($cached['latest'])&&version_compare((string)$cached['latest'],$current,'>');return $cached;}}
         $repo=(string)$this->app->config('github_repository');$releases=$this->httpJson('https://api.github.com/repos/'.$repo.'/releases?per_page=1');
         if ($releases === []) {
             $result=['checkedAt'=>gmdate('c'),'current'=>$this->currentVersion(),'latest'=>$this->currentVersion(),'available'=>false,'published'=>false,'releaseUrl'=>'','notes'=>'No published GitHub releases are available.','assets'=>[]];

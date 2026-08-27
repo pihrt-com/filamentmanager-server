@@ -14,6 +14,9 @@ foreach($required as $file)if(!is_file(FM_ROOT.'/'.$file))throw new RuntimeExcep
 $translations=[];
 foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resources/lang/'.$locale.'/messages.php';}
 $usedKeys=[];
-foreach(glob(FM_ROOT.'/resources/views/*.php')?:[] as $view){$source=(string)file_get_contents($view);preg_match_all("/View::t\\('([^']+)'/",$source,$matches);$usedKeys=array_merge($usedKeys,$matches[1]);if(str_contains($source,'style=')||str_contains($source,'<script'))throw new RuntimeException('Strict CSP violation in '.basename($view));}
+$translationSources=array_merge(glob(FM_ROOT.'/resources/views/*.php')?:[],glob(FM_ROOT.'/app/Controllers/*.php')?:[]);
+foreach($translationSources as $sourceFile){$source=(string)file_get_contents($sourceFile);preg_match_all("/View::t\\('([^']+)'/",$source,$matches);$usedKeys=array_merge($usedKeys,$matches[1]);if(str_contains($sourceFile,'resources/views')&&(str_contains($source,'style=')||str_contains($source,'<script')))throw new RuntimeException('Strict CSP violation in '.basename($sourceFile));}
 foreach(array_unique($usedKeys) as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} translation: {$key}");
+$webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
+foreach(['/materials/{id}/edit','/materials/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
 echo "Smoke tests passed.\n";

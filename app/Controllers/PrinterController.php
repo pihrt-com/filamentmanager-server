@@ -35,6 +35,8 @@ final class PrinterController
         $user = $this->app->auth()->requireRole('admin', 'manager');
         $name = trim((string) $request->input('name'));
         if ($name === '' || mb_strlen($name) > 120) throw new HttpException('Invalid printer name', 422);
+        $duplicate=$this->app->db()->fetch('SELECT id FROM printers WHERE workspace_id=? AND name=? AND id<>?',[$user['workspace_id'],$name,$id??'']);
+        if($duplicate){Session::flash('error',View::t('printer_name_exists',['name'=>$name]));Response::redirect($request->basePath().($id?'/printers/'.$id.'/edit':'/printers/new'));}
         $slotCount = max(1, min(16, (int) $request->input('slot_count', 1)));
         $desired = [];
         for ($number = 1; $number <= $slotCount; $number++) $desired[$number] = trim((string) $request->input('slot_' . $number)) ?: null;

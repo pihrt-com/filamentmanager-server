@@ -40,6 +40,8 @@ $router->post('/spools/{id}', [SpoolController::class, 'save'], [$webUser]);
 $router->post('/spools/{id}/delete', [SpoolController::class, 'delete'], [$webUser]);
 $router->get('/materials', [MaterialController::class, 'index'], [$webUser]);
 $router->post('/materials', [MaterialController::class, 'save'], [$webUser]);
+$router->get('/materials/{id}/edit', [MaterialController::class, 'index'], [$webUser]);
+$router->post('/materials/{id}', [MaterialController::class, 'save'], [$webUser]);
 $router->post('/materials/{id}/delete', [MaterialController::class, 'delete'], [$webUser]);
 $router->get('/locations', [LocationController::class, 'index'], [$webUser]);
 $router->post('/locations', [LocationController::class, 'save'], [$webUser]);
@@ -47,6 +49,7 @@ $router->post('/locations/{id}/delete', [LocationController::class, 'delete'], [
 $router->get('/admin/users', [UserController::class, 'index'], [$admin]);
 $router->post('/admin/users', [UserController::class, 'save'], [$admin]);
 $router->post('/admin/users/{id}/toggle', [UserController::class, 'toggle'], [$admin]);
+$router->post('/admin/users/{id}/delete', [UserController::class, 'delete'], [$admin]);
 $router->get('/admin/settings', [SettingsController::class, 'index'], [$admin]);
 $router->get('/admin/audit', [AuditController::class, 'index'], [$admin]);
 $router->post('/admin/settings/backup', [SettingsController::class, 'backup'], [$admin]);

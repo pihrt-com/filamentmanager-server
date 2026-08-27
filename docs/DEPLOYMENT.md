@@ -26,8 +26,8 @@ When the hosting panel cannot change the document root, upload the complete rele
 
 1. Create an empty MySQL or MariaDB database and a dedicated database user in the hosting control panel.
 2. Upload the release files in binary-safe mode and preserve `.htaccess` files.
-3. Confirm that `config/` and `storage/` are writable by PHP during installation.
-4. Open `/install/`, review the environment checks, enter the public HTTPS URL and database connection, and create the first administrator with a password of at least 12 characters.
+3. For shared hosting, first ensure that the uploaded project directory is `0755` and that `.htaccess` and `prepare-install.php` are `0644`; Apache needs these minimum permissions before it can run PHP. Then open `/prepare-install.php` once. It sets the remaining release directories to `0755`, files to `0644`, verifies that PHP can write `config/` and `storage/`, and provides a link to `/install/`. Delete `prepare-install.php` immediately after use. If the hosting panel already applies these modes, you may open `/install/` directly.
+4. Review the environment checks, enter the public HTTPS URL and database connection, and create the first administrator with a password of at least 12 characters.
 5. Sign in and open Administration > Settings to review filesystem-security diagnostics.
 6. Remove `/install/` and `/public/install/` through the hosting file manager or FTP. The `storage/installed.lock` file already blocks reinstalling before these directories are removed.
 7. After installation, use directory mode `0750` for private directories, `0755` for `public/`, file mode `0640` for local configuration, and the least permissive mode that still lets PHP write to `storage/`.

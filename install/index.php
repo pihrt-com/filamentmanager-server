@@ -28,8 +28,7 @@ FilamentManager\Core\SecurityHeaders::send(!empty($_SERVER['HTTPS']) && $_SERVER
 $_SESSION['install_csrf'] ??= bin2hex(random_bytes(32));
 $errors = [];
 $success = false;
-$publicInstaller = str_contains(str_replace('\\', '/', (string) ($_SERVER['SCRIPT_FILENAME'] ?? '')), '/public/install/');
-$assetPath = $publicInstaller ? '../assets/app.css' : '../public/assets/app.css';
+$assetPath = '../assets/app.css';
 
 $requirements = [
     'PHP >= 8.4' => version_compare(PHP_VERSION, '8.4.0', '>='),

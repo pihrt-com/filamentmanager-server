@@ -12,10 +12,16 @@ use FilamentManager\Controllers\UserController;
 use FilamentManager\Controllers\LocationController;
 use FilamentManager\Controllers\AuditController;
 use FilamentManager\Core\Router;
+use FilamentManager\Core\Response;
 
 $router = new Router();
-$webUser = static fn($request, $app) => $app->auth()->requireUser();
-$admin = static fn($request, $app) => $app->auth()->requireRole('admin');
+$webUser = static function ($request, $app): void {
+    if (!$app->auth()->user()) Response::redirect($request->basePath() . '/login');
+};
+$admin = static function ($request, $app): void {
+    if (!$app->auth()->user()) Response::redirect($request->basePath() . '/login');
+    $app->auth()->requireRole('admin');
+};
 
 $router->get('/login', [AuthController::class, 'form']);
 $router->post('/login', [AuthController::class, 'login']);

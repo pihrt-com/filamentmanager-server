@@ -18,10 +18,15 @@ final class UpdateService
     {
         $cache=FM_ROOT.'/storage/cache/update.json';
         if(!$force&&is_file($cache)&&filemtime($cache)>time()-(int)$this->app->config('update_check_interval',21600)){$cached=json_decode((string)file_get_contents($cache),true);if(is_array($cached))return $cached;}
-        $repo=(string)$this->app->config('github_repository');$release=$this->httpJson('https://api.github.com/repos/'.$repo.'/releases/latest');$tag=ltrim((string)($release['tag_name']??''),'v');if(!preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/',$tag))throw new RuntimeException('GitHub returned an invalid release version.');
+        $repo=(string)$this->app->config('github_repository');$releases=$this->httpJson('https://api.github.com/repos/'.$repo.'/releases?per_page=1');
+        if ($releases === []) {
+            $result=['checkedAt'=>gmdate('c'),'current'=>$this->currentVersion(),'latest'=>$this->currentVersion(),'available'=>false,'published'=>false,'releaseUrl'=>'','notes'=>'No published GitHub releases are available.','assets'=>[]];
+            $this->writeCache($cache,$result);return $result;
+        }
+        $release=$releases[0]??null;if(!is_array($release))throw new RuntimeException('GitHub returned an invalid releases response.');$tag=ltrim((string)($release['tag_name']??''),'v');if(!preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/',$tag))throw new RuntimeException('GitHub returned an invalid release version.');
         $assets=[];foreach($release['assets']??[] as $asset)$assets[(string)$asset['name']]=(string)$asset['browser_download_url'];
-        $result=['checkedAt'=>gmdate('c'),'current'=>$this->currentVersion(),'latest'=>$tag,'available'=>version_compare($tag,$this->currentVersion(),'>'),'releaseUrl'=>(string)($release['html_url']??''),'notes'=>(string)($release['body']??''),'assets'=>$assets];
-        file_put_contents($cache,json_encode($result,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR),LOCK_EX);return $result;
+        $result=['checkedAt'=>gmdate('c'),'current'=>$this->currentVersion(),'latest'=>$tag,'available'=>version_compare($tag,$this->currentVersion(),'>'),'published'=>true,'releaseUrl'=>(string)($release['html_url']??''),'notes'=>(string)($release['body']??''),'assets'=>$assets];
+        $this->writeCache($cache,$result);return $result;
     }
 
     public function install(string $expectedVersion): array
@@ -51,8 +56,26 @@ final class UpdateService
     {
         $archive=new ZipArchive();if($archive->open($archivePath)!==true)throw new RuntimeException('Cannot open file rollback archive.');if(!is_dir($destination))mkdir($destination,0750,true);if(!$archive->extractTo($destination)){$archive->close();throw new RuntimeException('Cannot extract file rollback archive.');}$archive->close();$this->copyRelease($destination,FM_ROOT);
     }
-    private function httpJson(string $url):array{$data=json_decode($this->httpText($url),true);if(!is_array($data))throw new RuntimeException('Invalid response from GitHub.');return $data;}
-    private function httpText(string $url):string{$ctx=stream_context_create(['http'=>['timeout'=>15,'ignore_errors'=>false,'header'=>"User-Agent: FilamentManager-Server/{$this->currentVersion()}\r\nAccept: application/vnd.github+json\r\n"]]);$data=@file_get_contents($url,false,$ctx);if(!is_string($data))throw new RuntimeException('Cannot contact GitHub.');return $data;}
+    private function writeCache(string $path,array $result):void{if(file_put_contents($path,json_encode($result,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR),LOCK_EX)===false)throw new RuntimeException('Cannot write the update cache. Check storage/cache permissions.');}
+    private function httpJson(string $url):array{$data=json_decode($this->httpText($url),true);if(!is_array($data))throw new RuntimeException('GitHub returned invalid JSON.');return $data;}
+    private function httpText(string $url):string
+    {
+        $headers=["User-Agent: FilamentManager-Server/{$this->currentVersion()}",'Accept: application/vnd.github+json','X-GitHub-Api-Version: 2022-11-28'];
+        if(function_exists('curl_init')){
+            $curl=curl_init($url);if($curl===false)throw new RuntimeException('Cannot initialize cURL.');
+            curl_setopt_array($curl,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>true,CURLOPT_CONNECTTIMEOUT=>10,CURLOPT_TIMEOUT=>30,CURLOPT_HTTPHEADER=>$headers]);
+            $data=curl_exec($curl);$error=curl_error($curl);$status=(int)curl_getinfo($curl,CURLINFO_RESPONSE_CODE);curl_close($curl);
+            if(!is_string($data))throw new RuntimeException('Cannot contact GitHub via cURL: '.($error?:'unknown transport error'));
+            if($status<200||$status>=300)throw new RuntimeException("GitHub returned HTTP {$status}.");
+            return $data;
+        }
+        if(!filter_var(ini_get('allow_url_fopen'),FILTER_VALIDATE_BOOL))throw new RuntimeException('Update checks require the PHP cURL extension or allow_url_fopen.');
+        $ctx=stream_context_create(['http'=>['timeout'=>30,'ignore_errors'=>true,'header'=>implode("\r\n",$headers)."\r\n"]]);$data=@file_get_contents($url,false,$ctx);
+        $status=0;foreach($http_response_header??[] as $header)if(preg_match('/^HTTP\/\S+\s+(\d{3})/',$header,$match))$status=(int)$match[1];
+        if(!is_string($data))throw new RuntimeException('Cannot contact GitHub. Check outbound HTTPS access and the server CA certificate bundle.');
+        if($status<200||$status>=300)throw new RuntimeException("GitHub returned HTTP {$status}.");
+        return $data;
+    }
     private function download(string $url,string $target):void{$data=$this->httpText($url);if(file_put_contents($target,$data,LOCK_EX)===false)throw new RuntimeException('Cannot save update package.');}
     private function removeTree(string $path):void{if(!is_dir($path))return;$items=new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path,\FilesystemIterator::SKIP_DOTS),\RecursiveIteratorIterator::CHILD_FIRST);foreach($items as $item){$item->isDir()?@rmdir($item->getPathname()):@unlink($item->getPathname());}@rmdir($path);}
 }

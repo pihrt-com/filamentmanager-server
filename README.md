@@ -27,6 +27,8 @@ The responsive web dashboard mirrors the mobile workflow: each printer shows all
 
 Upload a release package to the web server, point the web root to `public/`, and open `/install/`. The installer checks the environment, tests the database connection, creates all tables, creates the first administrator, writes the local configuration, and permanently locks itself.
 
+On shared hosting, set the project directory to `0755` and `.htaccess` plus `prepare-install.php` to `0644`, then open `/prepare-install.php` once. It normalizes all remaining release permissions, verifies writable installer paths, and provides a link to the installer. Delete this preparation script immediately after use.
+
 Two deployment layouts are supported. The recommended layout points the domain or subdirectory document root to `public/`, keeping all private code outside the web root. On Apache shared hosting where this cannot be configured, upload the complete project directory to a subdirectory such as `public_html/filamentmanager` and open `https://pihrt.com/filamentmanager/install/`; the root `.htaccess` blocks all private directories and routes public assets. See [Deployment](docs/DEPLOYMENT.md) for the complete procedure.
 
 The installer requires an existing empty database on most shared hosting services. It validates PHP extensions and writable paths, creates the complete schema, generates a random application key, creates the first administrator, hardens supported filesystem permissions, and writes an installer lock. Delete both installer entry directories after installation when the hosting account permits it; the lock prevents reuse even when deletion is unavailable.

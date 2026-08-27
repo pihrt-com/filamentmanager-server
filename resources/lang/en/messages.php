@@ -2,7 +2,7 @@
 
 return [
     'app_name' => 'FilamentManager', 'dashboard' => 'Printers', 'spools' => 'Spools', 'materials' => 'Materials',
-    'users' => 'Users', 'settings' => 'Settings', 'logout' => 'Log out', 'login' => 'Sign in',
+    'users' => 'Users', 'settings' => 'Settings', 'logout' => 'Log out', 'login' => 'Sign in', 'no_releases' => 'No release has been published on GitHub yet.', 'update_check_failed' => 'Update check failed: :message',
     'username' => 'Username', 'password' => 'Password', 'login_failed' => 'Invalid credentials or a temporarily locked account.',
     'add_printer' => 'Add printer', 'edit' => 'Edit', 'save' => 'Save', 'delete' => 'Delete', 'cancel' => 'Cancel',
     'printer_name' => 'Printer name', 'manufacturer' => 'Manufacturer', 'model' => 'Model', 'description' => 'Description',

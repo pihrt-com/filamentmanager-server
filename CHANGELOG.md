@@ -4,6 +4,12 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.17] - 2026-08-28
+
+### Fixed
+
+- Synchronization conflicts now include the client mutation ID and originally requested entity ID so mobile clients can retain the exact pending change when a natural key resolves to an existing server record.
+
 ## [0.1.16] - 2026-08-28
 
 ### Fixed

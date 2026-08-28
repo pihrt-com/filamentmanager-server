@@ -50,6 +50,7 @@ foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($ma
 if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
 if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
 if(!str_contains($syncService,"printer_id=? AND slot_number=?")||!str_contains($syncService,"\$id=(string)\$matching['id']"))throw new RuntimeException('Mobile slot upserts must reuse an existing natural printer slot.');
+if(!str_contains($syncService,"'clientMutationId'=>\$mutationId,'requestedId'=>\$requestedId"))throw new RuntimeException('Synchronization conflicts must identify the original mobile mutation.');
 if(!str_contains($apiController,'MAX(`sequence`)')||!str_contains($syncService,'MAX(`sequence`)')||!str_contains($syncService,'ORDER BY `sequence`'))throw new RuntimeException('Synchronization cursor SQL must quote the sequence column.');
 if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
 if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,'issueAccess($row')||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Stable device refresh tokens must preserve the user ID.');

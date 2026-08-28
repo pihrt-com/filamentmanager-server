@@ -42,12 +42,14 @@ $materialController=(string)file_get_contents(FM_ROOT.'/app/Controllers/Material
 $materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 $syncService=(string)file_get_contents(FM_ROOT.'/app/Services/SyncService.php');
+$apiController=(string)file_get_contents(FM_ROOT.'/app/Controllers/ApiController.php');
 $tokenService=(string)file_get_contents(FM_ROOT.'/app/Services/TokenService.php');
 $requestSource=(string)file_get_contents(FM_ROOT.'/app/Core/Request.php');
 $backupService=(string)file_get_contents(FM_ROOT.'/app/Services/BackupService.php');
 foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($materialsView,'name="'.$filter.'"'))throw new RuntimeException('Missing material filter '.$filter);
 if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
 if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
+if(!str_contains($apiController,'MAX(`sequence`)')||!str_contains($syncService,'MAX(`sequence`)')||!str_contains($syncService,'ORDER BY `sequence`'))throw new RuntimeException('Synchronization cursor SQL must quote the sequence column.');
 if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
 if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,'issueAccess($row')||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Stable device refresh tokens must preserve the user ID.');
 if(!str_contains($settingsView,'connected_devices')||!str_contains($webRoutes,'/admin/settings/device/revoke')||!str_contains($webRoutes,'/admin/settings/device/delete')||!str_contains($webRoutes,'/admin/settings/devices/delete-revoked'))throw new RuntimeException('Connected-device management is incomplete.');

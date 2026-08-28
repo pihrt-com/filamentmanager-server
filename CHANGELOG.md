@@ -4,6 +4,12 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.14] - 2026-08-28
+
+### Fixed
+
+- Quoted the synchronization cursor column in all SQL statements for compatibility with MariaDB/MySQL variants where `sequence` conflicts with SQL syntax, preventing HTTP 500 responses from the snapshot endpoint.
+
 ## [0.1.13] - 2026-08-28
 
 ### Fixed

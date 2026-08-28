@@ -24,4 +24,5 @@ return [
     'mobile_app'=>'Mobilní aplikace',
     'show_update'=>'Zobrazit aktualizaci',
     'printer_status'=>'Provozní stav', 'printer_status_active'=>'V provozu', 'printer_status_maintenance'=>'Údržba', 'printer_status_downtime'=>'Odstávka', 'printer_status_fault'=>'Porucha', 'printer_status_inactive'=>'Mimo provoz',
+    'connected_devices'=>'Připojená mobilní zařízení', 'connected_devices_help'=>'Každé přihlášení z mobilní aplikace vytvoří oprávnění zařízení. Jeho odvoláním se okamžitě zneplatní všechny access a refresh tokeny bez odstranění skladových dat.', 'device'=>'Zařízení', 'user'=>'Uživatel', 'app_version'=>'Verze aplikace', 'last_seen'=>'Naposledy aktivní', 'connected'=>'Připojeno', 'revoked'=>'Odvoláno', 'revoke'=>'Odvolat', 'revoke_device'=>'Odvolat přístup zařízení', 'revoke_device_help'=>'Mobilní aplikace se po této akci musí znovu přihlásit.', 'device_revoked'=>'Přístup zařízení byl odvolán.', 'no_connected_devices'=>'Zatím se nepřipojilo žádné mobilní zařízení.',
 ];

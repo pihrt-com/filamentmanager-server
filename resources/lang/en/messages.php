@@ -24,4 +24,5 @@ return [
     'mobile_app'=>'Mobile app',
     'show_update'=>'View update',
     'printer_status'=>'Operational status', 'printer_status_active'=>'Operational', 'printer_status_maintenance'=>'Maintenance', 'printer_status_downtime'=>'Downtime', 'printer_status_fault'=>'Fault', 'printer_status_inactive'=>'Out of service',
+    'connected_devices'=>'Connected mobile devices', 'connected_devices_help'=>'Each mobile sign-in creates a device authorization. Revoking a device immediately invalidates all of its access and refresh tokens without deleting inventory data.', 'device'=>'Device', 'user'=>'User', 'app_version'=>'App version', 'last_seen'=>'Last seen', 'connected'=>'Connected', 'revoked'=>'Revoked', 'revoke'=>'Revoke', 'revoke_device'=>'Revoke device access', 'revoke_device_help'=>'The mobile app must sign in again after this action.', 'device_revoked'=>'Device access was revoked.', 'no_connected_devices'=>'No mobile device has connected yet.',
 ];

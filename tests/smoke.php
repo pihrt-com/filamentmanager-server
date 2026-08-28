@@ -16,7 +16,7 @@ foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resourc
 $usedKeys=[];
 $translationSources=array_merge(glob(FM_ROOT.'/resources/views/*.php')?:[],glob(FM_ROOT.'/app/Controllers/*.php')?:[]);
 foreach($translationSources as $sourceFile){$source=(string)file_get_contents($sourceFile);preg_match_all("/View::t\\('([^']+)'/",$source,$matches);$usedKeys=array_merge($usedKeys,$matches[1]);if(str_contains($sourceFile,'resources/views')&&(str_contains($source,'style=')||str_contains($source,'<script')))throw new RuntimeException('Strict CSP violation in '.basename($sourceFile));}
-foreach(array_unique($usedKeys) as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} translation: {$key}");
+foreach(array_unique($usedKeys) as $key){if(str_ends_with($key,'_'))continue;foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} translation: {$key}");}
 $dynamicKeys=['role_admin','role_manager','role_operator','role_viewer','spool_status_in_stock','spool_status_loaded','spool_status_empty','spool_status_archived','printer_status_active','printer_status_maintenance','printer_status_downtime','printer_status_fault','printer_status_inactive'];
 foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} dynamic translation: {$key}");
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
@@ -48,7 +48,8 @@ foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($ma
 if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
 if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
 if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
-if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,"\$user['user_id']??\$user['id']")||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Refresh-token rotation must preserve the user ID.');
+if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,'issueAccess($row')||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Stable device refresh tokens must preserve the user ID.');
+if(!str_contains($settingsView,'connected_devices')||!str_contains($webRoutes,'/admin/settings/device/revoke'))throw new RuntimeException('Connected-device management is incomplete.');
 if(!str_contains($backupService,'$allowedColumns[$table][$column]'))throw new RuntimeException('Backup restore column whitelist is missing.');
 $layout=(string)file_get_contents(FM_ROOT.'/resources/views/layout.php');
 if(!is_file(FM_ROOT.'/public/assets/app-icon.png')||!str_contains($layout,'/assets/app-icon.png'))throw new RuntimeException('Application icon is missing from the shared layout.');

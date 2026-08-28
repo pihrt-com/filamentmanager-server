@@ -8,11 +8,11 @@ All endpoints use JSON and production clients must use HTTPS. Tokens are sent as
 
 ## Authentication
 
-`POST /api/v1/auth/login` accepts `username`, `password`, `deviceName`, and `appVersion`. It returns a short-lived access token, rotating refresh token, expiry values, device ID, and user profile.
+`POST /api/v1/auth/login` accepts `username`, `password`, `deviceName`, and `appVersion`. It returns a short-lived access token, a device refresh token, expiry values, device ID, and user profile.
 
-`POST /api/v1/auth/refresh` accepts `refreshToken`, revokes it, and returns a new access and refresh token pair. Reusing an expired or revoked token fails.
+`POST /api/v1/auth/refresh` accepts `refreshToken` and returns a new short-lived access token while preserving the device refresh token. An expired, logged-out, or administrator-revoked device token fails.
 
-Mobile clients store the rotating refresh token in Android secure storage. The user's password is used only for the initial sign-in and is never persisted by the mobile application.
+Mobile clients store the refresh token in Android secure storage. The user's password is used only for the initial sign-in and is never persisted by the mobile application. Administrators can review devices and revoke all of a device's tokens from Settings.
 
 `POST /api/v1/auth/logout` accepts `refreshToken` and revokes active tokens for that device.
 

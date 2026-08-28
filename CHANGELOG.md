@@ -4,6 +4,19 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-08-28
+
+### Added
+
+- Responsive connected-device management in Settings with user, platform, mobile app version, last activity, state, and administrator-controlled access revocation.
+- Audit records for device access revocation.
+- Current English interface screenshots in the project README.
+
+### Changed
+
+- Device refresh tokens remain stable until expiration, logout, or administrator revocation while short-lived access tokens continue to be renewed. This prevents a lost or overlapping refresh response from disconnecting the mobile application.
+- Replaced the obsolete planned-release section in README with the implemented feature set.
+
 ## [0.1.10] - 2026-08-28
 
 ### Fixed

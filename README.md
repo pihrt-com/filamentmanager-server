@@ -4,17 +4,33 @@ FilamentManager Server is a self-hosted PHP web application and REST API for man
 
 The responsive web dashboard mirrors the mobile workflow: each printer shows all filament slots with material, color, and remaining weight. Authorized users can manage printers, spools, materials, manufacturers, locations, and users. Changes are recorded in an audit trail and exposed through the versioned REST API for bidirectional mobile synchronization.
 
-## Planned first release
+## Features
 
-- Guided browser installation on standard PHP hosting
-- Czech and English user interface
-- Secure web login with roles and CSRF protection
-- Printer and multi-slot filament management
-- Manufacturer, material, spool, and storage-location records
-- REST API v1 with device tokens, versioned records, and conflict detection
-- Database and configuration backup and restore
-- Signed GitHub Release update checks with automatic pre-update backup
-- OpenPrintTag-ready spool metadata
+- Guided browser installation on standard PHP hosting with automatic schema migrations and filesystem checks
+- Responsive Czech and English interface for desktop, tablet, and mobile browsers
+- Secure web login with administrator, manager, operator, and viewer roles plus CSRF protection and an audit trail
+- Printer management with multiple filament slots and operational states
+- Manufacturer, material, spool, and hierarchical storage-location records with OpenPrintTag-ready metadata
+- Versioned REST API v1 with device authorization, offline synchronization, idempotent mutations, and conflict detection
+- Connected mobile-device overview with immediate administrator-controlled token revocation
+- Portable database and application-data backup and restore
+- GitHub Release update checks, SHA-256 package verification, automatic pre-update backup, migrations, and application-file rollback
+
+## Screenshots
+
+| Printers | Printer editing |
+| --- | --- |
+| ![Responsive printer overview](docs/screenshots/printers.png) | ![Printer and slot editing](docs/screenshots/printer-edit.png) |
+
+| Spools | Materials |
+| --- | --- |
+| ![Spool inventory](docs/screenshots/spools.png) | ![Filterable material catalog](docs/screenshots/materials.png) |
+
+| Storage locations | Users |
+| --- | --- |
+| ![Hierarchical storage locations](docs/screenshots/storage-locations.png) | ![Users and roles](docs/screenshots/users.png) |
+
+![Server updates, backups, security, and connected-device settings](docs/screenshots/settings.png)
 
 ## Requirements
 
@@ -37,15 +53,15 @@ The installer requires an existing empty database on most shared hosting service
 
 Administrators can create and download portable ZIP backups and restore them after a clean installation. A backup contains application data, users, printer assignments, inventory, movements, settings, and audit history. It intentionally excludes MySQL credentials, application secrets, sessions, and mobile device tokens.
 
-The dashboard checks GitHub Releases at a limited interval and notifies administrators when a newer semantic version is available. A one-click update requires the administrator password, creates a database backup, downloads the dedicated release package, verifies its SHA-256 checksum, enables maintenance mode, preserves local configuration and storage, copies the release atomically per file, and applies pending database migrations. See [Updates](docs/UPDATES.md) before publishing the first release.
+The dashboard checks GitHub Releases at a limited interval and notifies administrators when a newer semantic version is available. A one-click update requires the administrator password, creates a database backup, downloads the dedicated release package, verifies its SHA-256 checksum, enables maintenance mode, preserves local configuration and storage, copies the release atomically per file, and applies pending database migrations. See [Updates](docs/UPDATES.md) for the release and recovery procedure.
 
 ## REST API and synchronization
 
-The API is versioned under `/api/v1`. Mobile clients receive short-lived access tokens and rotating device refresh tokens. Initial synchronization uses a snapshot; subsequent synchronization uses a monotonic change cursor, client-generated UUIDs, idempotent mutation IDs, optimistic record versions, tombstones, and explicit conflict results. See [API](docs/API.md).
+The API is versioned under `/api/v1`. Mobile clients receive short-lived access tokens and a revocable refresh token scoped to the signed-in device. Initial synchronization uses a snapshot; subsequent synchronization uses a monotonic change cursor, client-generated UUIDs, idempotent mutation IDs, optimistic record versions, tombstones, and explicit conflict results. See [API](docs/API.md).
 
 ## Security
 
-Never commit `.env`, backups, logs, API tokens, or production credentials. Production installations must use HTTPS. Web requests use secure sessions and CSRF tokens; mobile clients use short-lived access tokens and rotating device refresh tokens.
+Never commit `.env`, backups, logs, API tokens, or production credentials. Production installations must use HTTPS. Web requests use secure sessions and CSRF tokens; mobile clients use short-lived access tokens and revocable device refresh tokens stored in Android secure storage.
 
 ## License
 

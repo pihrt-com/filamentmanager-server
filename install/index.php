@@ -123,10 +123,11 @@ function h(string $value): string { return htmlspecialchars($value, ENT_QUOTES |
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FilamentManager Server Installer</title>
+    <link rel="icon" type="image/png" href="../assets/app-icon.png">
     <link rel="stylesheet" href="<?= h($assetPath) ?>">
 </head>
 <body class="installer"><main class="install-card">
-    <h1>FilamentManager Server</h1><p class="muted">Secure installation</p>
+    <div class="login-brand"><img src="../assets/app-icon.png" alt=""><h1>FilamentManager Server</h1></div><p class="muted">Secure installation</p>
     <?php if ($success): ?>
         <div class="notice success"><strong>Installation completed.</strong> The installer is now locked.</div>
         <p><a class="button" href="../">Open FilamentManager</a></p>

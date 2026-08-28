@@ -4,6 +4,18 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-08-28
+
+### Added
+
+- Official mobile application icon in the shared navigation, login page, installer, and browser favicon.
+- Footer links to the FilamentManager mobile application source repository and Google Play listing.
+
+### Changed
+
+- The application icon and FilamentManager name now form a single home-page link.
+- Footer content is arranged into separate server and mobile-application rows.
+
 ## [0.1.6] - 2026-08-28
 
 ### Added

@@ -8,7 +8,7 @@ All endpoints use JSON and production clients must use HTTPS. Tokens are sent as
 
 ## Authentication
 
-`POST /api/v1/auth/login` accepts `username`, `password`, `deviceName`, and `appVersion`. It returns a short-lived access token, a device refresh token, expiry values, device ID, and user profile.
+`POST /api/v1/auth/login` accepts `username`, `password`, `deviceName`, `appVersion`, and the installation's stable UUID `deviceId`. It returns a short-lived access token, a device refresh token, expiry values, device ID, and user profile. Signing in again with the same UUID replaces that installation's previous tokens and updates its existing device record.
 
 `POST /api/v1/auth/refresh` accepts `refreshToken` and returns a new short-lived access token while preserving the device refresh token. An expired, logged-out, or administrator-revoked device token fails.
 

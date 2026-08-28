@@ -49,9 +49,12 @@ if(!str_contains($materialController,"requireRole('admin','manager')")||!str_con
 if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
 if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
 if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,'issueAccess($row')||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Stable device refresh tokens must preserve the user ID.');
-if(!str_contains($settingsView,'connected_devices')||!str_contains($webRoutes,'/admin/settings/device/revoke'))throw new RuntimeException('Connected-device management is incomplete.');
+if(!str_contains($settingsView,'connected_devices')||!str_contains($webRoutes,'/admin/settings/device/revoke')||!str_contains($webRoutes,'/admin/settings/device/delete')||!str_contains($webRoutes,'/admin/settings/devices/delete-revoked'))throw new RuntimeException('Connected-device management is incomplete.');
+if(!str_contains($tokenService,'$requestedDeviceId')||!str_contains($tokenService,'$canReuse'))throw new RuntimeException('Stable mobile installation IDs are missing.');
 if(!str_contains($backupService,'$allowedColumns[$table][$column]'))throw new RuntimeException('Backup restore column whitelist is missing.');
 $layout=(string)file_get_contents(FM_ROOT.'/resources/views/layout.php');
+if(!str_contains($layout,'app.css?v='))throw new RuntimeException('Versioned stylesheet cache busting is missing.');
+if(!str_contains($layout,'class="scroll-top"')||!str_contains($layout,'href="#top"'))throw new RuntimeException('Back-to-top control is missing.');
 if(!is_file(FM_ROOT.'/public/assets/app-icon.png')||!str_contains($layout,'/assets/app-icon.png'))throw new RuntimeException('Application icon is missing from the shared layout.');
 foreach(['https://github.com/pihrt-com/filamentmanager-mobile-app','https://play.google.com/store/apps/details?id=com.pihrt.filamentmanager.mobile'] as $mobileLink)if(!str_contains($layout,$mobileLink))throw new RuntimeException('Missing mobile application link '.$mobileLink);
 foreach(["'/printers', [PrinterController::class, 'save'], [\$manager]","'/materials', [MaterialController::class, 'save'], [\$manager]","'/locations', [LocationController::class, 'save'], [\$manager]","'/spools', [SpoolController::class, 'save'], [\$inventoryEditor]"] as $guard)if(!str_contains($webRoutes,$guard))throw new RuntimeException('Missing route-level write authorization: '.$guard);

@@ -12,7 +12,7 @@ The responsive web dashboard mirrors the mobile workflow: each printer shows all
 - Printer management with multiple filament slots and operational states
 - Manufacturer, material, spool, and hierarchical storage-location records with OpenPrintTag-ready metadata
 - Versioned REST API v1 with device authorization, offline synchronization, idempotent mutations, and conflict detection
-- Connected mobile-device overview with immediate administrator-controlled token revocation
+- Connected mobile-device overview with one stable record per app installation, immediate administrator-controlled token revocation, and cleanup of revoked devices
 - Portable database and application-data backup and restore
 - GitHub Release update checks, SHA-256 package verification, automatic pre-update backup, migrations, and application-file rollback
 

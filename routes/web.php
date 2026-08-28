@@ -67,6 +67,8 @@ $router->get('/admin/audit', [AuditController::class, 'index'], [$admin]);
 $router->post('/admin/settings/backup', [SettingsController::class, 'backup'], [$admin]);
 $router->post('/admin/settings/backup/delete', [SettingsController::class, 'deleteBackup'], [$admin]);
 $router->post('/admin/settings/device/revoke', [SettingsController::class, 'revokeDevice'], [$admin]);
+$router->post('/admin/settings/device/delete', [SettingsController::class, 'deleteDevice'], [$admin]);
+$router->post('/admin/settings/devices/delete-revoked', [SettingsController::class, 'deleteRevokedDevices'], [$admin]);
 $router->post('/admin/settings/restore', [SettingsController::class, 'restore'], [$admin]);
 $router->post('/admin/settings/update/check', [SettingsController::class, 'checkUpdate'], [$admin]);
 $router->post('/admin/settings/update/install', [SettingsController::class, 'installUpdate'], [$admin]);

@@ -11,7 +11,7 @@ use FilamentManager\Core\Uuid;
 final class TokenService
 {
     public function __construct(private readonly App $app) {}
-    public function login(string $username,string $password,string $deviceName,string $appVersion):array
+    public function login(string $username,string $password,string $deviceName,string $appVersion,string $requestedDeviceId=''):array
     {
         $user=$this->app->db()->fetch('SELECT * FROM users WHERE username=? AND is_active=1 AND deleted_at IS NULL LIMIT 1',[$username]);
         if(!$user||($user['locked_until']&&strtotime((string)$user['locked_until'])>time())||!password_verify($password,(string)$user['password_hash'])){
@@ -19,8 +19,7 @@ final class TokenService
             usleep(random_int(200000,450000));throw new HttpException('Invalid credentials',401);
         }
         $this->app->db()->execute('UPDATE users SET failed_login_count=0,locked_until=NULL,last_login_at=UTC_TIMESTAMP(6) WHERE id=?',[$user['id']]);
-        $deviceId=Uuid::v4();$this->app->db()->execute('INSERT INTO devices(id,workspace_id,user_id,name,platform,app_version,last_seen_at) VALUES(?,?,?,?,?,?,UTC_TIMESTAMP(6))',[$deviceId,$user['workspace_id'],$user['id'],mb_substr($deviceName?:'Android device',0,120),'android',mb_substr($appVersion,0,40)]);
-        return $this->issuePair($user,$deviceId);
+        return $this->app->db()->transaction(function($db)use($user,$deviceName,$appVersion,$requestedDeviceId){$validId=preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',$requestedDeviceId)===1;$device=$validId?$db->fetch('SELECT id,workspace_id,user_id FROM devices WHERE id=? FOR UPDATE',[$requestedDeviceId]):null;$canReuse=$device&&$device['workspace_id']===$user['workspace_id']&&$device['user_id']===$user['id'];if($canReuse){$deviceId=$requestedDeviceId;$db->execute('UPDATE api_refresh_tokens SET revoked_at=COALESCE(revoked_at,UTC_TIMESTAMP(6)) WHERE device_id=?',[$deviceId]);$db->execute('UPDATE api_access_tokens SET revoked_at=COALESCE(revoked_at,UTC_TIMESTAMP(6)) WHERE device_id=?',[$deviceId]);$db->execute('UPDATE devices SET name=?,platform=?,app_version=?,last_seen_at=UTC_TIMESTAMP(6),revoked_at=NULL WHERE id=?',[mb_substr($deviceName?:'Android device',0,120),'android',mb_substr($appVersion,0,40),$deviceId]);}else{$deviceId=$validId&&!$device?$requestedDeviceId:Uuid::v4();$db->execute('INSERT INTO devices(id,workspace_id,user_id,name,platform,app_version,last_seen_at) VALUES(?,?,?,?,?,?,UTC_TIMESTAMP(6))',[$deviceId,$user['workspace_id'],$user['id'],mb_substr($deviceName?:'Android device',0,120),'android',mb_substr($appVersion,0,40)]);}return $this->issuePair($user,$deviceId);});
     }
     public function refresh(string $rawRefresh):array
     {

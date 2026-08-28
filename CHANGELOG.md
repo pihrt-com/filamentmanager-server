@@ -4,6 +4,20 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-08-28
+
+### Added
+
+- Individual deletion of revoked devices and their tokens.
+- One-click deletion of every revoked device in the current workspace.
+- Stable mobile installation IDs, so signing in again updates one device record instead of creating an unlimited history of rows.
+- A floating, localized back-to-top button on every signed-in page with smooth scrolling and no JavaScript dependency.
+
+### Fixed
+
+- Versioned stylesheet URLs now invalidate the browser cache after a server update.
+- The connected-device card reliably spans the full Settings width and keeps wide tables inside a horizontal scroll container on small screens.
+
 ## [0.1.11] - 2026-08-28
 
 ### Added

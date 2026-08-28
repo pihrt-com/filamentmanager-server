@@ -38,18 +38,20 @@ final class BackupService
         if (!class_exists(ZipArchive::class)) throw new RuntimeException('PHP ZIP extension is required.');
         $zip = new ZipArchive();
         if ($zip->open($path) !== true) throw new RuntimeException('Cannot open backup archive.');
+        $manifestStat=$zip->statName('manifest.json');if(!is_array($manifestStat)||(int)($manifestStat['size']??0)>1024*1024){$zip->close();throw new RuntimeException('Backup manifest is missing or excessively large.');}
         $rawManifest = $zip->getFromName('manifest.json');
         $manifest = is_string($rawManifest) ? json_decode($rawManifest,true) : null;
         if (!is_array($manifest) || ($manifest['format']??'')!=='filamentmanager-backup' || (int)($manifest['formatVersion']??0)!==1) { $zip->close(); throw new RuntimeException('Unsupported or damaged backup.'); }
-        $data=[];
-        foreach(self::TABLES as $table){$raw=$zip->getFromName('database/'.$table.'.json');if(!is_string($raw)){ $zip->close();throw new RuntimeException('Backup is missing table '.$table);}$rows=json_decode($raw,true);if(!is_array($rows)){ $zip->close();throw new RuntimeException('Invalid data for '.$table);}$data[$table]=$rows;}
+        $data=[];$totalUncompressed=0;$maxEntryBytes=128*1024*1024;$maxTotalBytes=512*1024*1024;
+        foreach(self::TABLES as $table){$entry='database/'.$table.'.json';$stat=$zip->statName($entry);$size=is_array($stat)?(int)($stat['size']??0):0;if($size<0||$size>$maxEntryBytes||($totalUncompressed+=$size)>$maxTotalBytes){$zip->close();throw new RuntimeException('Backup contains excessively large data.');}$raw=$zip->getFromName($entry);if(!is_string($raw)){ $zip->close();throw new RuntimeException('Backup is missing table '.$table);}$rows=json_decode($raw,true);if(!is_array($rows)){ $zip->close();throw new RuntimeException('Invalid data for '.$table);}$data[$table]=$rows;}
         $zip->close();
         $pdo=$this->app->db()->pdo();
+        $allowedColumns=[];foreach(self::TABLES as $table){$columns=$pdo->query('SHOW COLUMNS FROM `'.$table.'`')->fetchAll(\PDO::FETCH_COLUMN);$allowedColumns[$table]=array_fill_keys($columns,true);}
         $pdo->beginTransaction();
         try{
             $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
             foreach(array_reverse(self::TABLES) as $table)$pdo->exec('DELETE FROM `'.$table.'`');
-            foreach(self::TABLES as $table)foreach($data[$table] as $row){if(!$row)continue;$columns=array_keys($row);$sql='INSERT INTO `'.$table.'` (`'.implode('`,`',$columns).'`) VALUES ('.implode(',',array_fill(0,count($columns),'?')).')';$stmt=$pdo->prepare($sql);$stmt->execute(array_values($row));}
+            foreach(self::TABLES as $table)foreach($data[$table] as $row){if(!$row)continue;if(!is_array($row))throw new RuntimeException('Invalid backup row for '.$table);$columns=array_keys($row);foreach($columns as $column)if(!is_string($column)||!isset($allowedColumns[$table][$column]))throw new RuntimeException('Backup contains an invalid column for '.$table);$sql='INSERT INTO `'.$table.'` (`'.implode('`,`',$columns).'`) VALUES ('.implode(',',array_fill(0,count($columns),'?')).')';$stmt=$pdo->prepare($sql);$stmt->execute(array_values($row));}
             $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
             $pdo->commit();
         }catch(\Throwable $e){try{$pdo->exec('SET FOREIGN_KEY_CHECKS=1');}catch(\Throwable){}if($pdo->inTransaction())$pdo->rollBack();throw $e;}

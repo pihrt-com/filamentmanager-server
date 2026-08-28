@@ -20,4 +20,5 @@ return [
     'spool_status_in_stock'=>'In stock', 'spool_status_loaded'=>'Loaded', 'spool_status_empty'=>'Empty', 'spool_status_archived'=>'Archived', 'spool_loaded_delete'=>'The spool cannot be deleted while it is loaded in a printer.',
     'storage_location'=>'Storage location', 'without_location'=>'No location', 'loaded_location_help'=>'The spool is loaded in a printer. Its storage location can be changed after unloading it.',
     'update_changes'=>'Changes in the new version', 'no_update_changes'=>'No change list is available for this update.', 'backup_deleted'=>'The backup was deleted.', 'backup_delete_failed'=>'The backup could not be deleted: :message',
+    'filters'=>'Filters', 'all'=>'All', 'filter'=>'Filter', 'clear_filters'=>'Clear filters',
 ];

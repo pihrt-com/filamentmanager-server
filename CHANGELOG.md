@@ -4,6 +4,25 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-08-28
+
+### Added
+
+- Material overview filters populated from stored material types, manufacturers, and colors.
+- Documented role-permission matrix and regression checks for write authorization.
+
+### Changed
+
+- Viewer pages now hide all create, edit, and delete controls.
+- Web write routes enforce permissions in middleware as well as controllers.
+- Operators may update spool and printer-slot data through synchronization but cannot delete records.
+- Sensitive responses are marked `no-store` and receive same-origin cross-origin isolation headers.
+
+### Security
+
+- Backup restore now validates every imported column against the live database schema, preventing SQL identifier injection from modified backup archives.
+- Backup restore limits manifest, per-entry, and total uncompressed archive sizes.
+
 ## [0.1.5] - 2026-08-28
 
 ### Added

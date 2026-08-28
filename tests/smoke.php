@@ -31,4 +31,15 @@ $dashboardView=(string)file_get_contents(FM_ROOT.'/resources/views/dashboard.php
 if(!str_contains($settingsView,"update['commits']"))throw new RuntimeException('Update commit overview is missing.');
 if(!str_contains($webRoutes,'/admin/settings/backup/delete'))throw new RuntimeException('Backup delete route is missing.');
 if(!str_contains($dashboardView,"update['available']"))throw new RuntimeException('Dashboard update notification is missing.');
+$materialController=(string)file_get_contents(FM_ROOT.'/app/Controllers/MaterialController.php');
+$materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php');
+$locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
+$syncService=(string)file_get_contents(FM_ROOT.'/app/Services/SyncService.php');
+$backupService=(string)file_get_contents(FM_ROOT.'/app/Services/BackupService.php');
+foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($materialsView,'name="'.$filter.'"'))throw new RuntimeException('Missing material filter '.$filter);
+if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
+if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
+if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
+if(!str_contains($backupService,'$allowedColumns[$table][$column]'))throw new RuntimeException('Backup restore column whitelist is missing.');
+foreach(["'/printers', [PrinterController::class, 'save'], [\$manager]","'/materials', [MaterialController::class, 'save'], [\$manager]","'/locations', [LocationController::class, 'save'], [\$manager]","'/spools', [SpoolController::class, 'save'], [\$inventoryEditor]"] as $guard)if(!str_contains($webRoutes,$guard))throw new RuntimeException('Missing route-level write authorization: '.$guard);
 echo "Smoke tests passed.\n";

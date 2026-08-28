@@ -15,3 +15,12 @@ Production installations must use HTTPS. The recommended document root is `publi
 Use a dedicated database account and grant only the permissions needed by the application. Keep `config/local.php` readable only by the web-server account, keep `storage/` writable only where required, disable directory listings, and remove the installer directories after a successful installation. Never commit production configuration or backups.
 
 Web authentication uses server-side sessions, secure cookies, password hashing, login lockouts, permission checks, and CSRF tokens. REST clients use Bearer tokens and never send tokens in a URL. Mobile refresh tokens are scoped to one device and stored only as SHA-256 hashes on the server.
+
+## Role permissions
+
+- `viewer`: read-only access in both the web interface and REST synchronization; all mutations are denied.
+- `operator`: may create and update spools and printer-slot assignments, but cannot delete records or manage printers, materials, locations, users, backups, or updates.
+- `manager`: may manage printers, spools, materials, and storage locations, but cannot manage users, backups, updates, or the audit log.
+- `admin`: full application administration.
+
+Write permissions are enforced both by route middleware and inside controllers or synchronization services. Web writes additionally require a valid CSRF token.

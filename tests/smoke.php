@@ -31,6 +31,10 @@ $dashboardView=(string)file_get_contents(FM_ROOT.'/resources/views/dashboard.php
 if(!str_contains($settingsView,"update['commits']"))throw new RuntimeException('Update commit overview is missing.');
 if(!str_contains($webRoutes,'/admin/settings/backup/delete'))throw new RuntimeException('Backup delete route is missing.');
 if(!str_contains($dashboardView,"update['available']"))throw new RuntimeException('Dashboard update notification is missing.');
+$authController=(string)file_get_contents(FM_ROOT.'/app/Controllers/AuthController.php');
+$dashboardController=(string)file_get_contents(FM_ROOT.'/app/Controllers/DashboardController.php');
+if(!str_contains($authController,"Session::put('check_updates_after_login', true)"))throw new RuntimeException('Post-login update check trigger is missing.');
+if(!str_contains($dashboardController,'$updates->check($force)')||!str_contains($dashboardView,'update-banner'))throw new RuntimeException('Immediate dashboard update banner is missing.');
 $materialController=(string)file_get_contents(FM_ROOT.'/app/Controllers/MaterialController.php');
 $materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');

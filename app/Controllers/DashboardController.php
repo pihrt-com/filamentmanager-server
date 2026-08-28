@@ -6,6 +6,7 @@ namespace FilamentManager\Controllers;
 
 use FilamentManager\Core\App;
 use FilamentManager\Core\Request;
+use FilamentManager\Core\Session;
 use FilamentManager\Core\View;
 use FilamentManager\Services\UpdateService;
 
@@ -21,7 +22,10 @@ final class DashboardController
         foreach ($slots as $slot) $byPrinter[$slot['printer_id']][] = $slot;
         $update = null;
         if ($user['role'] === 'admin') {
-            try { $update = (new UpdateService($this->app))->check(false); } catch (\Throwable) { $update = null; }
+            $force=Session::get('check_updates_after_login')===true;Session::forget('check_updates_after_login');$updates=new UpdateService($this->app);
+            try { $update = $updates->check($force); } catch (\Throwable) { try{$update=$updates->check(false);}catch(\Throwable){$update=null;} }
+        } else {
+            Session::forget('check_updates_after_login');
         }
         View::render('dashboard', ['title' => View::t('dashboard'), 'printers' => $printers, 'slotsByPrinter' => $byPrinter, 'update' => $update, 'basePath' => $request->basePath()]);
     }

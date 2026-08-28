@@ -22,4 +22,5 @@ return [
     'update_changes'=>'Změny v nové verzi', 'no_update_changes'=>'Pro tuto aktualizaci není dostupný seznam změn.', 'backup_deleted'=>'Záloha byla odstraněna.', 'backup_delete_failed'=>'Zálohu se nepodařilo odstranit: :message',
     'filters'=>'Filtry', 'all'=>'Vše', 'filter'=>'Filtrovat', 'clear_filters'=>'Zrušit filtry',
     'mobile_app'=>'Mobilní aplikace',
+    'show_update'=>'Zobrazit aktualizaci',
 ];

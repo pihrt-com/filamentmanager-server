@@ -8,6 +8,7 @@ use FilamentManager\Core\App;
 use FilamentManager\Core\Csrf;
 use FilamentManager\Core\Request;
 use FilamentManager\Core\Response;
+use FilamentManager\Core\Session;
 use FilamentManager\Core\View;
 use FilamentManager\Services\AuditService;
 
@@ -23,6 +24,7 @@ final class AuthController
     {
         Csrf::verify($request);
         if ($this->app->auth()->attempt(trim((string) $request->input('username')), (string) $request->input('password'))) {
+            Session::put('check_updates_after_login', true);
             (new AuditService($this->app))->record('auth.login');
             Response::redirect($request->basePath() . '/');
         }

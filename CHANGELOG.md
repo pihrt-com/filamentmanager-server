@@ -4,6 +4,18 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-08-28
+
+### Changed
+
+- Administrators now trigger a forced GitHub update check immediately after every successful sign-in.
+- Routine dashboard update checks use a 15-minute cache instead of a 6-hour cache.
+- Available updates appear in a prominent responsive warning banner with a direct link to update details.
+
+### Fixed
+
+- Newly published releases no longer remain hidden on the dashboard for up to six hours after an earlier up-to-date check.
+
 ## [0.1.7] - 2026-08-28
 
 ### Added

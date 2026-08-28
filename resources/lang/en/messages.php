@@ -22,4 +22,5 @@ return [
     'update_changes'=>'Changes in the new version', 'no_update_changes'=>'No change list is available for this update.', 'backup_deleted'=>'The backup was deleted.', 'backup_delete_failed'=>'The backup could not be deleted: :message',
     'filters'=>'Filters', 'all'=>'All', 'filter'=>'Filter', 'clear_filters'=>'Clear filters',
     'mobile_app'=>'Mobile app',
+    'show_update'=>'View update',
 ];

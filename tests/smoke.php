@@ -7,6 +7,7 @@ spl_autoload_register(static function(string $class):void{$prefix='FilamentManag
 
 $uuid=FilamentManager\Core\Uuid::v4();
 if(!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',$uuid))throw new RuntimeException('UUID v4 generation failed.');
+if(FilamentManager\Core\View::dateTime('2026-08-28 14:04:43.965429')!=='2026-08-28 14:04:43')throw new RuntimeException('UI timestamps must omit fractional seconds.');
 $migration=require FM_ROOT.'/database/migrations/001_initial.php';
 if(count($migration)<15)throw new RuntimeException('Initial schema is unexpectedly incomplete.');
 $required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php'];

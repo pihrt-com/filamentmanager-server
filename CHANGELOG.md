@@ -4,6 +4,12 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.18] - 2026-08-28
+
+### Changed
+
+- Removed fractional seconds from device activity, user sign-in, and audit timestamps in the web interface while retaining full database precision.
+
 ## [0.1.17] - 2026-08-28
 
 ### Fixed

@@ -23,4 +23,10 @@ final class View
     public static function e(mixed $value): string { return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
     public static function t(string $key, array $replace = []): string { return self::$app?->translator()->get($key, $replace) ?? $key; }
     public static function csrf(): string { return '<input type="hidden" name="_csrf" value="' . self::e(Csrf::token()) . '">'; }
+    public static function dateTime(mixed $value): string
+    {
+        $text = trim((string) $value);
+        if ($text === '') return '—';
+        return preg_replace('/\.\d+(?=\s|$)/', '', $text) ?? $text;
+    }
 }

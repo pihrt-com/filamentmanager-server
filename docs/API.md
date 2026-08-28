@@ -12,11 +12,15 @@ All endpoints use JSON and production clients must use HTTPS. Tokens are sent as
 
 `POST /api/v1/auth/refresh` accepts `refreshToken`, revokes it, and returns a new access and refresh token pair. Reusing an expired or revoked token fails.
 
+Mobile clients store the rotating refresh token in Android secure storage. The user's password is used only for the initial sign-in and is never persisted by the mobile application.
+
 `POST /api/v1/auth/logout` accepts `refreshToken` and revokes active tokens for that device.
 
 ## Initial synchronization
 
 `GET /api/v1/snapshot` returns the current cursor and all active printers, slots, manufacturers, materials, spools, and locations for the authenticated workspace.
+
+At first connection, the mobile application offers three explicit choices: upload local data to an empty server, download the server snapshot after creating a local safety backup, or merge both sides with a preview of duplicate printer names. Afterwards, local changes enter a persistent offline queue and are uploaded when the server is reachable.
 
 ## Incremental download
 

@@ -42,11 +42,13 @@ $materialController=(string)file_get_contents(FM_ROOT.'/app/Controllers/Material
 $materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 $syncService=(string)file_get_contents(FM_ROOT.'/app/Services/SyncService.php');
+$tokenService=(string)file_get_contents(FM_ROOT.'/app/Services/TokenService.php');
 $backupService=(string)file_get_contents(FM_ROOT.'/app/Services/BackupService.php');
 foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($materialsView,'name="'.$filter.'"'))throw new RuntimeException('Missing material filter '.$filter);
 if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
 if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
 if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
+if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,"\$user['user_id']??\$user['id']")||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Refresh-token rotation must preserve the user ID.');
 if(!str_contains($backupService,'$allowedColumns[$table][$column]'))throw new RuntimeException('Backup restore column whitelist is missing.');
 $layout=(string)file_get_contents(FM_ROOT.'/resources/views/layout.php');
 if(!is_file(FM_ROOT.'/public/assets/app-icon.png')||!str_contains($layout,'/assets/app-icon.png'))throw new RuntimeException('Application icon is missing from the shared layout.');

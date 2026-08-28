@@ -4,6 +4,16 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.10] - 2026-08-28
+
+### Fixed
+
+- Rotating a mobile refresh token now preserves the authenticated user ID, so long-running mobile synchronization can renew access tokens after the initial 15-minute access token expires.
+
+### Changed
+
+- Documented the mobile application's first-connection, offline-queue, and bidirectional synchronization workflow.
+
 ## [0.1.9] - 2026-08-28
 
 ### Added

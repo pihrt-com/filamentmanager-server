@@ -24,7 +24,7 @@ final class TokenService
     }
     public function refresh(string $rawRefresh):array
     {
-        return $this->app->db()->transaction(function($db)use($rawRefresh){$hash=hash('sha256',$rawRefresh);$row=$db->fetch('SELECT rt.*,u.workspace_id,u.username,u.display_name,u.role,u.locale,u.is_active,d.revoked_at device_revoked FROM api_refresh_tokens rt JOIN users u ON u.id=rt.user_id JOIN devices d ON d.id=rt.device_id WHERE rt.token_hash=? FOR UPDATE',[$hash]);if(!$row||$row['revoked_at']||$row['device_revoked']||!$row['is_active']||strtotime((string)$row['expires_at'])<=time())throw new HttpException('Invalid refresh token',401);$db->execute('UPDATE api_refresh_tokens SET revoked_at=UTC_TIMESTAMP(6) WHERE id=?',[$row['id']]);return $this->issuePair($row,$row['device_id'],$row['id']);});
+        return $this->app->db()->transaction(function($db)use($rawRefresh){$hash=hash('sha256',$rawRefresh);$row=$db->fetch('SELECT rt.*,u.id user_id,u.workspace_id,u.username,u.display_name,u.role,u.locale,u.is_active,d.revoked_at device_revoked FROM api_refresh_tokens rt JOIN users u ON u.id=rt.user_id JOIN devices d ON d.id=rt.device_id WHERE rt.token_hash=? FOR UPDATE',[$hash]);if(!$row||$row['revoked_at']||$row['device_revoked']||!$row['is_active']||strtotime((string)$row['expires_at'])<=time())throw new HttpException('Invalid refresh token',401);$db->execute('UPDATE api_refresh_tokens SET revoked_at=UTC_TIMESTAMP(6) WHERE id=?',[$row['id']]);return $this->issuePair($row,$row['device_id'],$row['id']);});
     }
     public function authenticate(string $rawToken):array
     {
@@ -38,10 +38,10 @@ final class TokenService
     }
     private function issuePair(array $user,string $deviceId,?string $rotatedFrom=null):array
     {
-        $access=$this->randomToken();$refresh=$this->randomToken();$accessId=Uuid::v4();$refreshId=Uuid::v4();$accessTtl=(int)$this->app->config('access_token_ttl',900);$refreshTtl=(int)$this->app->config('refresh_token_ttl',2592000);
-        $this->app->db()->execute('INSERT INTO api_access_tokens(id,device_id,user_id,token_hash,expires_at) VALUES(?,?,?,?,?)',[$accessId,$deviceId,$user['id'],hash('sha256',$access),gmdate('Y-m-d H:i:s',time()+$accessTtl)]);
-        $this->app->db()->execute('INSERT INTO api_refresh_tokens(id,device_id,user_id,token_hash,expires_at,rotated_from_id) VALUES(?,?,?,?,?,?)',[$refreshId,$deviceId,$user['id'],hash('sha256',$refresh),gmdate('Y-m-d H:i:s',time()+$refreshTtl),$rotatedFrom]);
-        return ['tokenType'=>'Bearer','accessToken'=>$access,'accessTokenExpiresIn'=>$accessTtl,'refreshToken'=>$refresh,'refreshTokenExpiresIn'=>$refreshTtl,'deviceId'=>$deviceId,'user'=>['id'=>$user['id'],'workspaceId'=>$user['workspace_id'],'username'=>$user['username'],'displayName'=>$user['display_name'],'role'=>$user['role'],'locale'=>$user['locale']]];
+        $access=$this->randomToken();$refresh=$this->randomToken();$accessId=Uuid::v4();$refreshId=Uuid::v4();$accessTtl=(int)$this->app->config('access_token_ttl',900);$refreshTtl=(int)$this->app->config('refresh_token_ttl',2592000);$userId=(string)($user['user_id']??$user['id']);
+        $this->app->db()->execute('INSERT INTO api_access_tokens(id,device_id,user_id,token_hash,expires_at) VALUES(?,?,?,?,?)',[$accessId,$deviceId,$userId,hash('sha256',$access),gmdate('Y-m-d H:i:s',time()+$accessTtl)]);
+        $this->app->db()->execute('INSERT INTO api_refresh_tokens(id,device_id,user_id,token_hash,expires_at,rotated_from_id) VALUES(?,?,?,?,?,?)',[$refreshId,$deviceId,$userId,hash('sha256',$refresh),gmdate('Y-m-d H:i:s',time()+$refreshTtl),$rotatedFrom]);
+        return ['tokenType'=>'Bearer','accessToken'=>$access,'accessTokenExpiresIn'=>$accessTtl,'refreshToken'=>$refresh,'refreshTokenExpiresIn'=>$refreshTtl,'deviceId'=>$deviceId,'user'=>['id'=>$userId,'workspaceId'=>$user['workspace_id'],'username'=>$user['username'],'displayName'=>$user['display_name'],'role'=>$user['role'],'locale'=>$user['locale']]];
     }
     private function randomToken():string{return rtrim(strtr(base64_encode(random_bytes(48)),'+/','-_'),'=');}
 }

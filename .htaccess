@@ -1,6 +1,10 @@
 Options -Indexes
 RewriteEngine On
 
+# Preserve Bearer credentials on Apache/FastCGI hosts that do not expose
+# Authorization as HTTP_AUTHORIZATION automatically.
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 RewriteRule (^|/)\. - [F,L]
 RewriteRule ^(?:app|config|database|resources|routes|storage|tests|tools)(?:/|$) - [F,L,NC]
 RewriteRule ^(?:README|CHANGELOG|LICENSE|VERSION)(?:\.|$) - [F,L,NC]

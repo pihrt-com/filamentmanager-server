@@ -4,6 +4,13 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.13] - 2026-08-28
+
+### Fixed
+
+- Bearer authentication now works on Apache/FastCGI hosting configurations that expose the `Authorization` header as `REDIRECT_HTTP_AUTHORIZATION` or otherwise omit `HTTP_AUTHORIZATION`.
+- Both supported web-root layouts explicitly preserve the Authorization header during URL rewriting, preventing freshly issued access tokens from being rejected by protected API endpoints.
+
 ## [0.1.12] - 2026-08-28
 
 ### Added

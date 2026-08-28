@@ -43,6 +43,7 @@ $materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 $syncService=(string)file_get_contents(FM_ROOT.'/app/Services/SyncService.php');
 $tokenService=(string)file_get_contents(FM_ROOT.'/app/Services/TokenService.php');
+$requestSource=(string)file_get_contents(FM_ROOT.'/app/Core/Request.php');
 $backupService=(string)file_get_contents(FM_ROOT.'/app/Services/BackupService.php');
 foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($materialsView,'name="'.$filter.'"'))throw new RuntimeException('Missing material filter '.$filter);
 if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
@@ -51,6 +52,12 @@ if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool'
 if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,'issueAccess($row')||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Stable device refresh tokens must preserve the user ID.');
 if(!str_contains($settingsView,'connected_devices')||!str_contains($webRoutes,'/admin/settings/device/revoke')||!str_contains($webRoutes,'/admin/settings/device/delete')||!str_contains($webRoutes,'/admin/settings/devices/delete-revoked'))throw new RuntimeException('Connected-device management is incomplete.');
 if(!str_contains($tokenService,'$requestedDeviceId')||!str_contains($tokenService,'$canReuse'))throw new RuntimeException('Stable mobile installation IDs are missing.');
+if(!str_contains($requestSource,'REDIRECT_HTTP_AUTHORIZATION')||!str_contains((string)file_get_contents(FM_ROOT.'/.htaccess'),'E=HTTP_AUTHORIZATION')||!str_contains((string)file_get_contents(FM_ROOT.'/public/.htaccess'),'E=HTTP_AUTHORIZATION'))throw new RuntimeException('Authorization header forwarding for Apache/FastCGI is incomplete.');
+$originalServer=$_SERVER;
+$_SERVER=['REQUEST_URI'=>'/api/v1/snapshot','SCRIPT_NAME'=>'/index.php','REQUEST_METHOD'=>'GET','REDIRECT_HTTP_AUTHORIZATION'=>'Bearer forwarded-token'];
+$forwardedRequest=FilamentManager\Core\Request::capture();
+$_SERVER=$originalServer;
+if($forwardedRequest->bearerToken()!=='forwarded-token')throw new RuntimeException('Forwarded Authorization header cannot be read.');
 if(!str_contains($backupService,'$allowedColumns[$table][$column]'))throw new RuntimeException('Backup restore column whitelist is missing.');
 $layout=(string)file_get_contents(FM_ROOT.'/resources/views/layout.php');
 if(!str_contains($layout,'app.css?v='))throw new RuntimeException('Versioned stylesheet cache busting is missing.');

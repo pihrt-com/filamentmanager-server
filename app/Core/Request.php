@@ -43,7 +43,23 @@ final class Request
     public function header(string $name): ?string
     {
         $key = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
-        return isset($this->server[$key]) ? trim((string) $this->server[$key]) : null;
+        $candidates = [$key];
+        if (strcasecmp($name, 'Authorization') === 0) {
+            $candidates = ['HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION', 'Authorization'];
+        }
+        foreach ($candidates as $candidate) {
+            if (isset($this->server[$candidate]) && trim((string) $this->server[$candidate]) !== '') {
+                return trim((string) $this->server[$candidate]);
+            }
+        }
+        if (function_exists('getallheaders')) {
+            foreach ((array) getallheaders() as $headerName => $value) {
+                if (strcasecmp((string) $headerName, $name) === 0 && trim((string) $value) !== '') {
+                    return trim((string) $value);
+                }
+            }
+        }
+        return null;
     }
     public function bearerToken(): ?string
     {

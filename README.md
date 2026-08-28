@@ -8,6 +8,12 @@ FilamentManager Server is a self-hosted PHP web application and REST API for man
 
 The responsive web dashboard mirrors the mobile workflow: each printer shows all filament slots with material, color, and remaining weight. Authorized users can manage printers, spools, materials, manufacturers, locations, and users. Changes are recorded in an audit trail and exposed through the versioned REST API for bidirectional mobile synchronization.
 
+## FilamentManager ecosystem
+
+This repository contains the self-hosted server, web administration, installer, database migrations, backups, updates, and REST API. The companion [FilamentManager Mobile repository](https://github.com/pihrt-com/filamentmanager-mobile-app) contains the offline-first Android client, NFC/OpenPrintTag support, local backups, and USB-testable APK and Google Play builds. Either application can be used independently; connecting them adds secure bidirectional synchronization while the phone remains usable offline.
+
+Start with this server README for hosting, administration, API, backup, and update instructions. Use the [mobile README](https://github.com/pihrt-com/filamentmanager-mobile-app#readme) for Android installation, phone workflows, NFC, local data, and the first-connection choices.
+
 ## Features
 
 - Guided browser installation on standard PHP hosting with automatic schema migrations and filesystem checks
@@ -63,6 +69,8 @@ The dashboard checks GitHub Releases at a limited interval and notifies administ
 ## REST API and synchronization
 
 The API is versioned under `/api/v1`. Mobile clients receive short-lived access tokens and a revocable refresh token scoped to the signed-in device. Initial synchronization uses a snapshot; subsequent synchronization uses a monotonic change cursor, client-generated UUIDs, idempotent mutation IDs, optimistic record versions, tombstones, and explicit conflict results. See [API](docs/API.md).
+
+Printer inventory and operational states synchronize in both directions. The web dashboard's A–Z, Z–A, or custom printer order is a server display preference and is intentionally not overwritten by the phone's independent A–Z, Z–A, or drag-and-drop order. The mobile app exposes connection state through its cloud indicator and can trigger synchronization by pulling down on the printer overview.
 
 ## Security
 

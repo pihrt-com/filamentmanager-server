@@ -22,6 +22,8 @@ Mobile clients store the refresh token in Android secure storage. The user's pas
 
 At first connection, the mobile application offers three explicit choices: upload local data to an empty server, download the server snapshot after creating a local safety backup, or merge both sides with a preview of duplicate printer names. Afterwards, local changes enter a persistent offline queue and are uploaded when the server is reachable.
 
+The printer `sort_order` field is not writable through mobile synchronization. The server keeps its selected natural or custom web-dashboard order independently from the mobile application's local natural or drag-and-drop order.
+
 ## Incremental download
 
 `GET /api/v1/sync/changes?after=CURSOR&limit=200` returns ordered changes and a new cursor. Deleted records are represented by tombstones. The maximum page size is 500.
@@ -48,3 +50,5 @@ Supported entity types are `printer`, `printer_slot`, `manufacturer`, `material`
 ```
 
 API error responses contain a stable code, message, and request ID. HTTP 401 indicates missing or expired authentication, 403 insufficient permission, 419 an invalid browser CSRF token, 422 invalid input, and 409 a state conflict where applicable.
+
+For the user-facing Android connection and conflict workflow, see the [FilamentManager Mobile README](https://github.com/pihrt-com/filamentmanager-mobile-app#optional-server-synchronization).

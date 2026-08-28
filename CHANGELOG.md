@@ -14,7 +14,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 ### Changed
 
 - Mobile synchronization no longer overwrites the server-specific printer order.
-- Added the application logo and a linked Google Play download badge to the README.
+- Updated the README and API/update guides with the application logo, linked Google Play badge, current synchronization behavior, independent server/mobile ordering, and cross-repository documentation links.
 
 ## [0.1.18] - 2026-08-28
 

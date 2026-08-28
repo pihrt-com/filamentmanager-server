@@ -23,4 +23,5 @@ return [
     'filters'=>'Filters', 'all'=>'All', 'filter'=>'Filter', 'clear_filters'=>'Clear filters',
     'mobile_app'=>'Mobile app',
     'show_update'=>'View update',
+    'printer_status'=>'Operational status', 'printer_status_active'=>'Operational', 'printer_status_maintenance'=>'Maintenance', 'printer_status_downtime'=>'Downtime', 'printer_status_fault'=>'Fault', 'printer_status_inactive'=>'Out of service',
 ];

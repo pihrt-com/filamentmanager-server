@@ -39,7 +39,7 @@ final class SyncService
     {
         if(isset($values['color_hex'])&&$values['color_hex']!==null&&!preg_match('/^#[0-9A-Fa-f]{6}$/',(string)$values['color_hex']))throw new HttpException('Invalid color value',422);
         foreach(['original_net_weight_g','current_net_weight_g','tare_weight_g'] as $field)if(isset($values[$field])&&(float)$values[$field]<0)throw new HttpException('Weight cannot be negative',422);
-        if(isset($values['status'])){$allowed=$type==='printer'?['active','maintenance','inactive']:['in_stock','loaded','empty','archived'];if(!in_array($values['status'],$allowed,true))throw new HttpException('Invalid status',422);}
+        if(isset($values['status'])){$allowed=$type==='printer'?['active','maintenance','downtime','fault','inactive']:['in_stock','loaded','empty','archived'];if(!in_array($values['status'],$allowed,true))throw new HttpException('Invalid status',422);}
         $references=match($type){'printer_slot'=>['printer_id'=>'printers','loaded_spool_id'=>'spools'],'material'=>['manufacturer_id'=>'manufacturers'],'spool'=>['material_id'=>'materials','location_id'=>'locations'],'location'=>['parent_id'=>'locations'],default=>[]};
         foreach($references as $field=>$table)if(isset($values[$field])&&$values[$field]!==''&&!$db->fetch('SELECT id FROM `'.$table.'` WHERE id=? AND workspace_id=? AND deleted_at IS NULL',[$values[$field],$workspaceId]))throw new HttpException('Invalid reference '.$field,422);
     }

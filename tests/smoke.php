@@ -17,7 +17,7 @@ $usedKeys=[];
 $translationSources=array_merge(glob(FM_ROOT.'/resources/views/*.php')?:[],glob(FM_ROOT.'/app/Controllers/*.php')?:[]);
 foreach($translationSources as $sourceFile){$source=(string)file_get_contents($sourceFile);preg_match_all("/View::t\\('([^']+)'/",$source,$matches);$usedKeys=array_merge($usedKeys,$matches[1]);if(str_contains($sourceFile,'resources/views')&&(str_contains($source,'style=')||str_contains($source,'<script')))throw new RuntimeException('Strict CSP violation in '.basename($sourceFile));}
 foreach(array_unique($usedKeys) as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} translation: {$key}");
-$dynamicKeys=['role_admin','role_manager','role_operator','role_viewer','spool_status_in_stock','spool_status_loaded','spool_status_empty','spool_status_archived'];
+$dynamicKeys=['role_admin','role_manager','role_operator','role_viewer','spool_status_in_stock','spool_status_loaded','spool_status_empty','spool_status_archived','printer_status_active','printer_status_maintenance','printer_status_downtime','printer_status_fault','printer_status_inactive'];
 foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} dynamic translation: {$key}");
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
 foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
@@ -35,6 +35,9 @@ $authController=(string)file_get_contents(FM_ROOT.'/app/Controllers/AuthControll
 $dashboardController=(string)file_get_contents(FM_ROOT.'/app/Controllers/DashboardController.php');
 if(!str_contains($authController,"Session::put('check_updates_after_login', true)"))throw new RuntimeException('Post-login update check trigger is missing.');
 if(!str_contains($dashboardController,'$updates->check($force)')||!str_contains($dashboardView,'update-banner'))throw new RuntimeException('Immediate dashboard update banner is missing.');
+$printerController=(string)file_get_contents(FM_ROOT.'/app/Controllers/PrinterController.php');
+$printerForm=(string)file_get_contents(FM_ROOT.'/resources/views/printer_form.php');
+if(!is_file(FM_ROOT.'/database/migrations/002_printer_operational_statuses.php')||!str_contains($printerController,"request->input('status','active')")||!str_contains($printerForm,'name="status"')||!str_contains($dashboardView,'is-unavailable'))throw new RuntimeException('Printer operational status support is incomplete.');
 $materialController=(string)file_get_contents(FM_ROOT.'/app/Controllers/MaterialController.php');
 $materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');

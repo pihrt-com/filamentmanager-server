@@ -35,6 +35,7 @@ final class PrinterController
         $user = $this->app->auth()->requireRole('admin', 'manager');
         $name = trim((string) $request->input('name'));
         if ($name === '' || mb_strlen($name) > 120) throw new HttpException('Invalid printer name', 422);
+        $status=(string)$request->input('status','active');if(!in_array($status,['active','maintenance','downtime','fault','inactive'],true))throw new HttpException('Invalid printer status',422);
         $duplicate=$this->app->db()->fetch('SELECT id FROM printers WHERE workspace_id=? AND name=? AND id<>?',[$user['workspace_id'],$name,$id??'']);
         if($duplicate){Session::flash('error',View::t('printer_name_exists',['name'=>$name]));Response::redirect($request->basePath().($id?'/printers/'.$id.'/edit':'/printers/new'));}
         $slotCount = max(1, min(16, (int) $request->input('slot_count', 1)));
@@ -45,17 +46,17 @@ final class PrinterController
 
         $db = $this->app->db();
         $before = null;
-        $db->transaction(function () use ($db, $request, $user, $name, $slotCount, $desired, &$id, &$before): void {
+        $db->transaction(function () use ($db, $request, $user, $name, $status, $slotCount, $desired, &$id, &$before): void {
             if ($id) {
                 $before = $db->fetch('SELECT * FROM printers WHERE id=? AND workspace_id=? AND deleted_at IS NULL FOR UPDATE', [$id, $user['workspace_id']]);
                 if (!$before) throw new HttpException('Printer not found', 404);
                 if ((int) $request->input('version', 0) !== (int) $before['version']) throw new HttpException('Printer was changed by another user. Reload the form.', 409);
                 $printerVersion = (int) $before['version'] + 1;
-                $db->execute('UPDATE printers SET name=?,manufacturer=?,model=?,description=?,version=? WHERE id=?', [$name, trim((string) $request->input('manufacturer')) ?: null, trim((string) $request->input('model')) ?: null, trim((string) $request->input('description')) ?: null, $printerVersion, $id]);
+                $db->execute('UPDATE printers SET name=?,manufacturer=?,model=?,description=?,status=?,version=? WHERE id=?', [$name, trim((string) $request->input('manufacturer')) ?: null, trim((string) $request->input('model')) ?: null, trim((string) $request->input('description')) ?: null, $status, $printerVersion, $id]);
             } else {
                 $id = Uuid::v4();
                 $printerVersion = 1;
-                $db->execute('INSERT INTO printers (id,workspace_id,name,manufacturer,model,description,sort_order) VALUES (?,?,?,?,?,?,COALESCE((SELECT MAX(p.sort_order)+1 FROM printers p WHERE p.workspace_id=?),0))', [$id, $user['workspace_id'], $name, trim((string) $request->input('manufacturer')) ?: null, trim((string) $request->input('model')) ?: null, trim((string) $request->input('description')) ?: null, $user['workspace_id']]);
+                $db->execute('INSERT INTO printers (id,workspace_id,name,manufacturer,model,description,status,sort_order) VALUES (?,?,?,?,?,?,?,COALESCE((SELECT MAX(p.sort_order)+1 FROM printers p WHERE p.workspace_id=?),0))', [$id, $user['workspace_id'], $name, trim((string) $request->input('manufacturer')) ?: null, trim((string) $request->input('model')) ?: null, trim((string) $request->input('description')) ?: null, $status, $user['workspace_id']]);
             }
 
             $existing = $db->fetchAll('SELECT * FROM printer_slots WHERE printer_id=? AND deleted_at IS NULL ORDER BY slot_number FOR UPDATE', [$id]);

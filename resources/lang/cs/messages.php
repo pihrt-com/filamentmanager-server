@@ -23,4 +23,5 @@ return [
     'filters'=>'Filtry', 'all'=>'Vše', 'filter'=>'Filtrovat', 'clear_filters'=>'Zrušit filtry',
     'mobile_app'=>'Mobilní aplikace',
     'show_update'=>'Zobrazit aktualizaci',
+    'printer_status'=>'Provozní stav', 'printer_status_active'=>'V provozu', 'printer_status_maintenance'=>'Údržba', 'printer_status_downtime'=>'Odstávka', 'printer_status_fault'=>'Porucha', 'printer_status_inactive'=>'Mimo provoz',
 ];

@@ -4,6 +4,15 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-08-28
+
+### Added
+
+- Editable printer operational status: operational, maintenance, downtime, fault, or out of service.
+- Localized operational-status labels in Czech and English.
+- Status badges and crossed-out, muted printer cards for every non-operational state on the dashboard.
+- Database migration and synchronization validation for the expanded printer states.
+
 ## [0.1.8] - 2026-08-28
 
 ### Changed

@@ -4,6 +4,13 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.16] - 2026-08-28
+
+### Fixed
+
+- Mobile upserts now reuse an existing empty printer slot with the same printer and slot number instead of failing its unique constraint when the phone generated a new slot UUID.
+- A genuinely occupied matching slot is returned as a synchronization conflict rather than an internal server error.
+
 ## [0.1.15] - 2026-08-28
 
 ### Added

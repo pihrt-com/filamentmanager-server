@@ -4,6 +4,18 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-08-28
+
+### Added
+
+- Storage-location selection when creating or editing a spool.
+- Current storage location in the spool overview.
+- Inventory transfer history when a spool changes its storage location.
+
+### Fixed
+
+- Creating a root storage location no longer triggers the self-parent validation and a subsequent 404 page.
+
 ## [0.1.3] - 2026-08-27
 
 ### Added

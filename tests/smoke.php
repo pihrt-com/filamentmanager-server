@@ -21,4 +21,9 @@ $dynamicKeys=['role_admin','role_manager','role_operator','role_viewer','spool_s
 foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} dynamic translation: {$key}");
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
 foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
+$locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
+if(!str_contains($locationController,'$id!==null&&$parent===$id'))throw new RuntimeException('New locations must not trigger the self-parent check.');
+$spoolController=(string)file_get_contents(FM_ROOT.'/app/Controllers/SpoolController.php');
+$spoolForm=(string)file_get_contents(FM_ROOT.'/resources/views/spool_form.php');
+if(!str_contains($spoolController,'location_id')||!str_contains($spoolForm,'name="location_id"'))throw new RuntimeException('Spool storage-location assignment is missing.');
 echo "Smoke tests passed.\n";

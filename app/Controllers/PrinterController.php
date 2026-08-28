@@ -151,6 +151,28 @@ final class PrinterController
         Response::redirect($request->basePath() . '/');
     }
 
+    public function move(Request $request, string $id): void
+    {
+        Csrf::verify($request);
+        $user = $this->app->auth()->requireRole('admin', 'manager');
+        $direction = (string) $request->input('direction');
+        if (!in_array($direction, ['up', 'down'], true)) throw new HttpException('Invalid move direction', 422);
+        $this->app->db()->transaction(function ($db) use ($user, $id, $direction): void {
+            $workspace = $db->fetch('SELECT printer_sort_mode FROM workspaces WHERE id=? FOR UPDATE', [$user['workspace_id']]);
+            if (($workspace['printer_sort_mode'] ?? 'az') !== 'custom') throw new HttpException('Custom printer sorting is not enabled', 409);
+            $printers = $db->fetchAll('SELECT id,sort_order FROM printers WHERE workspace_id=? AND deleted_at IS NULL ORDER BY sort_order,name FOR UPDATE', [$user['workspace_id']]);
+            foreach ($printers as $index => $printer) $db->execute('UPDATE printers SET sort_order=? WHERE id=?', [$index, $printer['id']]);
+            $current = array_search($id, array_column($printers, 'id'), true);
+            if ($current === false) throw new HttpException('Printer not found', 404);
+            $target = $direction === 'up' ? $current - 1 : $current + 1;
+            if (!isset($printers[$target])) return;
+            $db->execute('UPDATE printers SET sort_order=? WHERE id=?', [$target, $id]);
+            $db->execute('UPDATE printers SET sort_order=? WHERE id=?', [$current, $printers[$target]['id']]);
+        });
+        (new AuditService($this->app))->record('printer.reordered', 'printer', $id, null, ['direction' => $direction]);
+        Response::redirect($request->basePath() . '/');
+    }
+
     private function movement($db, array $user, string $spoolId, string $type, string $printerId, string $slotId): void
     {
         $db->execute('INSERT INTO spool_movements(id,workspace_id,spool_id,movement_type,printer_id,printer_slot_id,source,user_id) VALUES(?,?,?,?,?,?,?,?)', [Uuid::v4(), $user['workspace_id'], $spoolId, $type, $printerId, $slotId, 'web', $user['id']]);

@@ -40,6 +40,7 @@ $router->post('/printers', [PrinterController::class, 'save'], [$manager]);
 $router->get('/printers/{id}/edit', [PrinterController::class, 'form'], [$manager]);
 $router->post('/printers/{id}', [PrinterController::class, 'save'], [$manager]);
 $router->post('/printers/{id}/delete', [PrinterController::class, 'delete'], [$manager]);
+$router->post('/printers/{id}/move', [PrinterController::class, 'move'], [$manager]);
 $router->get('/spools', [SpoolController::class, 'index'], [$webUser]);
 $router->get('/spools/new', [SpoolController::class, 'form'], [$inventoryEditor]);
 $router->post('/spools', [SpoolController::class, 'save'], [$inventoryEditor]);
@@ -65,6 +66,7 @@ $router->post('/admin/users/{id}/delete', [UserController::class, 'delete'], [$a
 $router->get('/admin/settings', [SettingsController::class, 'index'], [$admin]);
 $router->get('/admin/audit', [AuditController::class, 'index'], [$admin]);
 $router->post('/admin/settings/backup', [SettingsController::class, 'backup'], [$admin]);
+$router->post('/admin/settings/printer-sort', [SettingsController::class, 'savePrinterSort'], [$admin]);
 $router->post('/admin/settings/backup/delete', [SettingsController::class, 'deleteBackup'], [$admin]);
 $router->post('/admin/settings/device/revoke', [SettingsController::class, 'revokeDevice'], [$admin]);
 $router->post('/admin/settings/device/delete', [SettingsController::class, 'deleteDevice'], [$admin]);

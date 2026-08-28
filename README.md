@@ -2,6 +2,10 @@
 
 FilamentManager Server is a self-hosted PHP web application and REST API for managing 3D printers, loaded filament spools, users, and future filament inventory. It is the server companion for [FilamentManager Mobile](https://github.com/pihrt-com/filamentmanager-mobile-app).
 
+<img src="public/assets/app-icon.png" alt="FilamentManager application logo" width="160">
+
+<a href="https://play.google.com/store/apps/details?id=com.pihrt.filamentmanager.mobile"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get FilamentManager on Google Play" width="220"></a>
+
 The responsive web dashboard mirrors the mobile workflow: each printer shows all filament slots with material, color, and remaining weight. Authorized users can manage printers, spools, materials, manufacturers, locations, and users. Changes are recorded in an audit trail and exposed through the versioned REST API for bidirectional mobile synchronization.
 
 ## Features
@@ -10,6 +14,7 @@ The responsive web dashboard mirrors the mobile workflow: each printer shows all
 - Responsive Czech and English interface for desktop, tablet, and mobile browsers
 - Secure web login with administrator, manager, operator, and viewer roles plus CSRF protection and an audit trail
 - Printer management with multiple filament slots and operational states
+- Natural A–Z, natural Z–A, or administrator-defined custom printer ordering
 - Manufacturer, material, spool, and hierarchical storage-location records with OpenPrintTag-ready metadata
 - Versioned REST API v1 with device authorization, offline synchronization, idempotent mutations, and conflict detection
 - Connected mobile-device overview with one stable record per app installation, immediate administrator-controlled token revocation, and cleanup of revoked devices

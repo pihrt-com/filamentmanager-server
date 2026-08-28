@@ -4,6 +4,18 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.19] - 2026-08-28
+
+### Added
+
+- Added natural A–Z, natural Z–A, and administrator-controlled custom printer sorting modes.
+- Added up and down controls to printer cards when custom sorting is enabled.
+
+### Changed
+
+- Mobile synchronization no longer overwrites the server-specific printer order.
+- Added the application logo and a linked Google Play download badge to the README.
+
 ## [0.1.18] - 2026-08-28
 
 ### Changed

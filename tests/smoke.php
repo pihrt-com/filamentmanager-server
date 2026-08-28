@@ -10,7 +10,7 @@ if(!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 if(FilamentManager\Core\View::dateTime('2026-08-28 14:04:43.965429')!=='2026-08-28 14:04:43')throw new RuntimeException('UI timestamps must omit fractional seconds.');
 $migration=require FM_ROOT.'/database/migrations/001_initial.php';
 if(count($migration)<15)throw new RuntimeException('Initial schema is unexpectedly incomplete.');
-$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php'];
+$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php'];
 foreach($required as $file)if(!is_file(FM_ROOT.'/'.$file))throw new RuntimeException('Missing '.$file);
 $translations=[];
 foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resources/lang/'.$locale.'/messages.php';}
@@ -36,6 +36,8 @@ $authController=(string)file_get_contents(FM_ROOT.'/app/Controllers/AuthControll
 $dashboardController=(string)file_get_contents(FM_ROOT.'/app/Controllers/DashboardController.php');
 if(!str_contains($authController,"Session::put('check_updates_after_login', true)"))throw new RuntimeException('Post-login update check trigger is missing.');
 if(!str_contains($dashboardController,'$updates->check($force)')||!str_contains($dashboardView,'update-banner'))throw new RuntimeException('Immediate dashboard update banner is missing.');
+if(!str_contains($dashboardController,'strnatcasecmp')||!str_contains($settingsView,'printer_sort_mode')||!str_contains($dashboardView,'name="direction"'))throw new RuntimeException('Configurable natural and custom printer sorting is incomplete.');
+if(!str_contains($webRoutes,'/admin/settings/printer-sort')||!str_contains($webRoutes,'/printers/{id}/move'))throw new RuntimeException('Printer sorting routes are missing.');
 $printerController=(string)file_get_contents(FM_ROOT.'/app/Controllers/PrinterController.php');
 $printerForm=(string)file_get_contents(FM_ROOT.'/resources/views/printer_form.php');
 if(!is_file(FM_ROOT.'/database/migrations/002_printer_operational_statuses.php')||!str_contains($printerController,"request->input('status','active')")||!str_contains($printerForm,'name="status"')||!str_contains($dashboardView,'is-unavailable'))throw new RuntimeException('Printer operational status support is incomplete.');
@@ -50,6 +52,7 @@ $backupService=(string)file_get_contents(FM_ROOT.'/app/Services/BackupService.ph
 foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($materialsView,'name="'.$filter.'"'))throw new RuntimeException('Missing material filter '.$filter);
 if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
 if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
+if(str_contains($syncService,"'status','sort_order'"))throw new RuntimeException('Mobile synchronization must not overwrite the server-specific printer order.');
 if(!str_contains($syncService,"printer_id=? AND slot_number=?")||!str_contains($syncService,"\$id=(string)\$matching['id']"))throw new RuntimeException('Mobile slot upserts must reuse an existing natural printer slot.');
 if(!str_contains($syncService,"'clientMutationId'=>\$mutationId,'requestedId'=>\$requestedId"))throw new RuntimeException('Synchronization conflicts must identify the original mobile mutation.');
 if(!str_contains($apiController,'MAX(`sequence`)')||!str_contains($syncService,'MAX(`sequence`)')||!str_contains($syncService,'ORDER BY `sequence`'))throw new RuntimeException('Synchronization cursor SQL must quote the sequence column.');

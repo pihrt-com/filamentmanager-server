@@ -9,7 +9,7 @@ use FilamentManager\Core\App; use FilamentManager\Core\HttpException;
 final class SyncService
 {
     private const MAP=[
-        'printer'=>['table'=>'printers','fields'=>['name','manufacturer','model','description','status','sort_order']],
+        'printer'=>['table'=>'printers','fields'=>['name','manufacturer','model','description','status']],
         'printer_slot'=>['table'=>'printer_slots','fields'=>['printer_id','slot_number','label','loaded_spool_id']],
         'manufacturer'=>['table'=>'manufacturers','fields'=>['name','website','notes']],
         'material'=>['table'=>'materials','fields'=>['manufacturer_id','material_type','commercial_name','color_name','color_hex','diameter_mm','density_g_cm3','nozzle_temp_min','nozzle_temp_max','bed_temp_min','bed_temp_max','notes']],

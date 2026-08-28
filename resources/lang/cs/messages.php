@@ -19,4 +19,5 @@ return [
     'role_admin'=>'Administrátor', 'role_manager'=>'Správce', 'role_operator'=>'Operátor', 'role_viewer'=>'Čtenář',
     'spool_status_in_stock'=>'Skladem', 'spool_status_loaded'=>'V tiskárně', 'spool_status_empty'=>'Prázdná', 'spool_status_archived'=>'Archivovaná', 'spool_loaded_delete'=>'Cívku nelze odstranit, dokud je vložená v tiskárně.',
     'storage_location'=>'Skladové místo', 'without_location'=>'Bez umístění', 'loaded_location_help'=>'Cívka je vložená v tiskárně. Skladové místo lze změnit po jejím vyjmutí.',
+    'update_changes'=>'Změny v nové verzi', 'no_update_changes'=>'Pro tuto aktualizaci není dostupný seznam změn.', 'backup_deleted'=>'Záloha byla odstraněna.', 'backup_delete_failed'=>'Zálohu se nepodařilo odstranit: :message',
 ];

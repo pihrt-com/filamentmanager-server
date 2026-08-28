@@ -78,6 +78,13 @@ final class BackupService
         $files=glob(FM_ROOT.'/storage/backups/filamentmanager-backup-*.zip')?:[];rsort($files,SORT_STRING);return array_map(static fn($p)=>['name'=>basename($p),'size'=>filesize($p),'createdAt'=>gmdate('c',filemtime($p))],$files);
     }
 
+    public function delete(string $name): void
+    {
+        if(!preg_match('/^filamentmanager-backup-\d{8}-\d{6}\.zip$/',$name)||basename($name)!==$name)throw new RuntimeException('Invalid backup filename.');
+        $path=FM_ROOT.'/storage/backups/'.$name;if(!is_file($path))throw new RuntimeException('Backup file was not found.');
+        if(!unlink($path))throw new RuntimeException('Backup file could not be deleted.');
+    }
+
     private function prune(int $keep): void
     {
         $files=glob(FM_ROOT.'/storage/backups/filamentmanager-backup-*.zip')?:[];rsort($files,SORT_STRING);foreach(array_slice($files,max(1,$keep)) as $file)@unlink($file);

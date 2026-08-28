@@ -25,7 +25,9 @@ final class UpdateService
         }
         $release=$releases[0]??null;if(!is_array($release))throw new RuntimeException('GitHub returned an invalid releases response.');$tag=ltrim((string)($release['tag_name']??''),'v');if(!preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/',$tag))throw new RuntimeException('GitHub returned an invalid release version.');
         $assets=[];foreach($release['assets']??[] as $asset)$assets[(string)$asset['name']]=(string)$asset['browser_download_url'];
-        $result=['checkedAt'=>gmdate('c'),'current'=>$this->currentVersion(),'latest'=>$tag,'available'=>version_compare($tag,$this->currentVersion(),'>'),'published'=>true,'releaseUrl'=>(string)($release['html_url']??''),'notes'=>(string)($release['body']??''),'assets'=>$assets];
+        $current=$this->currentVersion();$available=version_compare($tag,$current,'>');$commits=[];
+        if($available){try{$comparison=$this->httpJson('https://api.github.com/repos/'.$repo.'/compare/v'.rawurlencode($current).'...v'.rawurlencode($tag));foreach($comparison['commits']??[] as $commit){$message=trim((string)($commit['commit']['message']??''));$firstLine=strtok($message,"\n")?:$message;$commits[]=['sha'=>substr((string)($commit['sha']??''),0,7),'message'=>$firstLine,'url'=>(string)($commit['html_url']??'')];}}catch(\Throwable){$commits=[];}}
+        $result=['checkedAt'=>gmdate('c'),'current'=>$current,'latest'=>$tag,'available'=>$available,'published'=>true,'releaseUrl'=>(string)($release['html_url']??''),'notes'=>(string)($release['body']??''),'commits'=>$commits,'assets'=>$assets];
         $this->writeCache($cache,$result);return $result;
     }
 

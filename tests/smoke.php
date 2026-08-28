@@ -26,4 +26,9 @@ if(!str_contains($locationController,'$id!==null&&$parent===$id'))throw new Runt
 $spoolController=(string)file_get_contents(FM_ROOT.'/app/Controllers/SpoolController.php');
 $spoolForm=(string)file_get_contents(FM_ROOT.'/resources/views/spool_form.php');
 if(!str_contains($spoolController,'location_id')||!str_contains($spoolForm,'name="location_id"'))throw new RuntimeException('Spool storage-location assignment is missing.');
+$settingsView=(string)file_get_contents(FM_ROOT.'/resources/views/settings.php');
+$dashboardView=(string)file_get_contents(FM_ROOT.'/resources/views/dashboard.php');
+if(!str_contains($settingsView,"update['commits']"))throw new RuntimeException('Update commit overview is missing.');
+if(!str_contains($webRoutes,'/admin/settings/backup/delete'))throw new RuntimeException('Backup delete route is missing.');
+if(!str_contains($dashboardView,"update['available']"))throw new RuntimeException('Dashboard update notification is missing.');
 echo "Smoke tests passed.\n";

@@ -4,6 +4,22 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-08-28
+
+### Added
+
+- Scrollable commit overview for available updates, with release notes as a fallback.
+- Administrator controls for deleting stored database backups.
+- Audit logging for backup deletion.
+
+### Changed
+
+- The stored-backup list now shows all backups in a scrollable panel.
+
+### Security
+
+- Backup deletion requires administrator access, CSRF validation, and a strictly validated backup filename.
+
 ## [0.1.4] - 2026-08-28
 
 ### Added

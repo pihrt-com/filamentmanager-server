@@ -57,6 +57,7 @@ $router->post('/admin/users/{id}/delete', [UserController::class, 'delete'], [$a
 $router->get('/admin/settings', [SettingsController::class, 'index'], [$admin]);
 $router->get('/admin/audit', [AuditController::class, 'index'], [$admin]);
 $router->post('/admin/settings/backup', [SettingsController::class, 'backup'], [$admin]);
+$router->post('/admin/settings/backup/delete', [SettingsController::class, 'deleteBackup'], [$admin]);
 $router->post('/admin/settings/restore', [SettingsController::class, 'restore'], [$admin]);
 $router->post('/admin/settings/update/check', [SettingsController::class, 'checkUpdate'], [$admin]);
 $router->post('/admin/settings/update/install', [SettingsController::class, 'installUpdate'], [$admin]);

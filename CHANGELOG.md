@@ -4,6 +4,12 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.15] - 2026-08-28
+
+### Added
+
+- Added an administrator-only diagnostics card showing the latest server exception log entries with request IDs; all output is HTML-escaped and authentication tokens are never logged.
+
 ## [0.1.14] - 2026-08-28
 
 ### Fixed

@@ -53,6 +53,7 @@ if(!str_contains($apiController,'MAX(`sequence`)')||!str_contains($syncService,'
 if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
 if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,'issueAccess($row')||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Stable device refresh tokens must preserve the user ID.');
 if(!str_contains($settingsView,'connected_devices')||!str_contains($webRoutes,'/admin/settings/device/revoke')||!str_contains($webRoutes,'/admin/settings/device/delete')||!str_contains($webRoutes,'/admin/settings/devices/delete-revoked'))throw new RuntimeException('Connected-device management is incomplete.');
+if(!str_contains($settingsView,'server_diagnostics')||!str_contains($settingsView,'View::e($line)'))throw new RuntimeException('Escaped administrator diagnostics are missing.');
 if(!str_contains($tokenService,'$requestedDeviceId')||!str_contains($tokenService,'$canReuse'))throw new RuntimeException('Stable mobile installation IDs are missing.');
 if(!str_contains($requestSource,'REDIRECT_HTTP_AUTHORIZATION')||!str_contains((string)file_get_contents(FM_ROOT.'/.htaccess'),'E=HTTP_AUTHORIZATION')||!str_contains((string)file_get_contents(FM_ROOT.'/public/.htaccess'),'E=HTTP_AUTHORIZATION'))throw new RuntimeException('Authorization header forwarding for Apache/FastCGI is incomplete.');
 $originalServer=$_SERVER;

@@ -38,6 +38,7 @@ if(!str_contains($authController,"Session::put('check_updates_after_login', true
 if(!str_contains($dashboardController,'$updates->check($force)')||!str_contains($dashboardView,'update-banner'))throw new RuntimeException('Immediate dashboard update banner is missing.');
 if(!str_contains($dashboardController,'strnatcasecmp')||!str_contains($settingsView,'printer_sort_mode')||!str_contains($dashboardView,'name="direction"'))throw new RuntimeException('Configurable natural and custom printer sorting is incomplete.');
 if(!str_contains($webRoutes,'/admin/settings/printer-sort')||!str_contains($webRoutes,'/printers/{id}/move'))throw new RuntimeException('Printer sorting routes are missing.');
+if(!str_contains($webRoutes,"'/help', [HelpController::class, 'index'], [\$webUser]")||!is_file(FM_ROOT.'/resources/views/help.php'))throw new RuntimeException('Authenticated help page is missing.');
 $printerController=(string)file_get_contents(FM_ROOT.'/app/Controllers/PrinterController.php');
 $printerForm=(string)file_get_contents(FM_ROOT.'/resources/views/printer_form.php');
 if(!is_file(FM_ROOT.'/database/migrations/002_printer_operational_statuses.php')||!str_contains($printerController,"request->input('status','active')")||!str_contains($printerForm,'name="status"')||!str_contains($dashboardView,'is-unavailable'))throw new RuntimeException('Printer operational status support is incomplete.');
@@ -71,6 +72,7 @@ if(!str_contains($backupService,'$allowedColumns[$table][$column]'))throw new Ru
 $layout=(string)file_get_contents(FM_ROOT.'/resources/views/layout.php');
 if(!str_contains($layout,'app.css?v='))throw new RuntimeException('Versioned stylesheet cache busting is missing.');
 if(!str_contains($layout,'class="scroll-top"')||!str_contains($layout,'href="#top"'))throw new RuntimeException('Back-to-top control is missing.');
+if(!str_contains($layout,"View::t('help')")||!str_contains($layout,'/help'))throw new RuntimeException('Help navigation is missing.');
 if(!is_file(FM_ROOT.'/public/assets/app-icon.png')||!str_contains($layout,'/assets/app-icon.png'))throw new RuntimeException('Application icon is missing from the shared layout.');
 foreach(['https://github.com/pihrt-com/filamentmanager-mobile-app','https://play.google.com/store/apps/details?id=com.pihrt.filamentmanager.mobile'] as $mobileLink)if(!str_contains($layout,$mobileLink))throw new RuntimeException('Missing mobile application link '.$mobileLink);
 foreach(["'/printers', [PrinterController::class, 'save'], [\$manager]","'/materials', [MaterialController::class, 'save'], [\$manager]","'/locations', [LocationController::class, 'save'], [\$manager]","'/spools', [SpoolController::class, 'save'], [\$inventoryEditor]"] as $guard)if(!str_contains($webRoutes,$guard))throw new RuntimeException('Missing route-level write authorization: '.$guard);

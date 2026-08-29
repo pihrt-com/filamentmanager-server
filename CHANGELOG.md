@@ -4,6 +4,14 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.20] - 2026-08-29
+
+### Added
+
+- Added a responsive Czech and English Help page available to every signed-in role.
+- Documented the recommended material, storage location, spool, printer, loading, weight-update, and unloading workflow directly in the web interface.
+- Added concise definitions of the inventory entities and notes about planned G-code/slicer consumption imports and pending physical OpenPrintTag verification.
+
 ## [0.1.19] - 2026-08-28
 
 ### Added

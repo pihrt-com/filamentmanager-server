@@ -18,6 +18,7 @@ Start with this server README for hosting, administration, API, backup, and upda
 
 - Guided browser installation on standard PHP hosting with automatic schema migrations and filesystem checks
 - Responsive Czech and English interface for desktop, tablet, and mobile browsers
+- Built-in Czech and English Help page explaining the complete inventory workflow to every signed-in role
 - Secure web login with administrator, manager, operator, and viewer roles plus CSRF protection and an audit trail
 - Printer management with multiple filament slots and operational states
 - Natural A–Z, natural Z–A, or administrator-defined custom printer ordering

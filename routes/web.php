@@ -11,6 +11,7 @@ use FilamentManager\Controllers\SpoolController;
 use FilamentManager\Controllers\UserController;
 use FilamentManager\Controllers\LocationController;
 use FilamentManager\Controllers\AuditController;
+use FilamentManager\Controllers\HelpController;
 use FilamentManager\Core\Router;
 use FilamentManager\Core\Response;
 
@@ -35,6 +36,7 @@ $router->get('/login', [AuthController::class, 'form']);
 $router->post('/login', [AuthController::class, 'login']);
 $router->post('/logout', [AuthController::class, 'logout'], [$webUser]);
 $router->get('/', [DashboardController::class, 'index'], [$webUser]);
+$router->get('/help', [HelpController::class, 'index'], [$webUser]);
 $router->get('/printers/new', [PrinterController::class, 'form'], [$manager]);
 $router->post('/printers', [PrinterController::class, 'save'], [$manager]);
 $router->get('/printers/{id}/edit', [PrinterController::class, 'form'], [$manager]);

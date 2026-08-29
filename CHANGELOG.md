@@ -4,6 +4,14 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.21] - 2026-08-29
+
+### Fixed
+
+- Release ZIP generation now always uses portable forward-slash entry paths, including when built with Windows PowerShell.
+- Failed web updates now return to Settings with the specific failure reason instead of showing a generic HTTP 500 page.
+- Unsafe release archive diagnostics now identify the rejected entry while retaining path-traversal protection.
+
 ## [0.1.20] - 2026-08-29
 
 ### Added

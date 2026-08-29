@@ -3,7 +3,7 @@
 return [
     'app_name' => 'FilamentManager', 'dashboard' => 'Tiskárny', 'spools' => 'Cívky', 'materials' => 'Materiály',
     'users' => 'Uživatelé', 'settings' => 'Nastavení', 'logout' => 'Odhlásit', 'login' => 'Přihlásit', 'no_releases' => 'Na GitHubu zatím není publikována žádná verze.', 'update_check_failed' => 'Kontrola aktualizací selhala: :message',
-    'username' => 'Uživatelské jméno', 'password' => 'Heslo', 'login_failed' => 'Neplatné přihlašovací údaje nebo dočasně uzamčený účet.',
+    'username' => 'Uživatelské jméno', 'password' => 'Heslo', 'login_failed' => 'Neplatné přihlašovací údaje nebo dočasně uzamčený účet.', 'update_install_failed' => 'Aktualizaci se nepodařilo nainstalovat: :message',
     'add_printer' => 'Přidat tiskárnu', 'edit' => 'Upravit', 'save' => 'Uložit', 'delete' => 'Odstranit', 'cancel' => 'Zrušit', 'edit_material' => 'Upravit materiál', 'deleted_success' => 'Položka byla odstraněna.',
     'printer_name' => 'Název tiskárny', 'manufacturer' => 'Výrobce', 'model' => 'Model', 'description' => 'Popis',
     'slots' => 'Pozice', 'slot' => 'Pozice', 'material' => 'Materiál', 'color' => 'Barva', 'remaining' => 'Zbývá',

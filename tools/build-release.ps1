@@ -18,7 +18,16 @@ try{
     Expand-Archive -LiteralPath $sourceArchive -DestinationPath $archiveRoot
     $zipPath=Join-Path $outputDir ('filamentmanager-server-'+$Version+'.zip')
     if(Test-Path -LiteralPath $zipPath){Remove-Item -LiteralPath $zipPath -Force}
-    Compress-Archive -Path $archiveRoot -DestinationPath $zipPath -CompressionLevel Optimal
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip=[System.IO.Compression.ZipFile]::Open($zipPath,[System.IO.Compression.ZipArchiveMode]::Create)
+    try{
+        $rootName=[System.IO.Path]::GetFileName($archiveRoot)
+        foreach($file in Get-ChildItem -LiteralPath $archiveRoot -Recurse -File){
+            $relative=$file.FullName.Substring($archiveRoot.Length+1).Replace('\','/')
+            $entryName=$rootName+'/'+$relative
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$file.FullName,$entryName,[System.IO.Compression.CompressionLevel]::Optimal)|Out-Null
+        }
+    }finally{$zip.Dispose()}
     $hash=(Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()
     [System.IO.File]::WriteAllText($zipPath+'.sha256',$hash+'  '+[System.IO.Path]::GetFileName($zipPath)+[Environment]::NewLine,[System.Text.UTF8Encoding]::new($false))
     Write-Output $zipPath

@@ -40,7 +40,7 @@ final class UpdateService
         $zipPath=$stage.'/'.$zipName;$this->download($release['assets'][$zipName],$zipPath);$expectedHash=trim($this->httpText($release['assets'][$shaName]));$expectedHash=preg_split('/\s+/', $expectedHash)[0]??'';
         if(!preg_match('/^[a-f0-9]{64}$/i',$expectedHash)||!hash_equals(strtolower($expectedHash),hash_file('sha256',$zipPath)))throw new RuntimeException('Update checksum verification failed.');
         $archive=new ZipArchive();if($archive->open($zipPath)!==true)throw new RuntimeException('Cannot open update archive.');$extract=$stage.'/package';mkdir($extract,0750,true);
-        for($i=0;$i<$archive->numFiles;$i++){ $name=$archive->getNameIndex($i);if($name===false||str_contains($name,'..')||str_starts_with($name,'/')||str_contains($name,'\\'))throw new RuntimeException('Unsafe path in update archive.'); }
+        for($i=0;$i<$archive->numFiles;$i++){ $name=$archive->getNameIndex($i);if($name===false||str_contains($name,'..')||str_starts_with($name,'/')||str_contains($name,'\\'))throw new RuntimeException('Unsafe path in update archive: '.($name===false?'unknown entry':$name)); }
         if(!$archive->extractTo($extract)){ $archive->close();throw new RuntimeException('Cannot extract update archive.');}$archive->close();
         $root=$extract;if(!is_file($root.'/VERSION')){$children=glob($extract.'/*',GLOB_ONLYDIR)?:[];if(count($children)===1)$root=$children[0];}
         if(trim((string)@file_get_contents($root.'/VERSION'))!==$expectedVersion)throw new RuntimeException('Update package version does not match.');

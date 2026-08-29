@@ -50,6 +50,7 @@ $apiController=(string)file_get_contents(FM_ROOT.'/app/Controllers/ApiController
 $tokenService=(string)file_get_contents(FM_ROOT.'/app/Services/TokenService.php');
 $requestSource=(string)file_get_contents(FM_ROOT.'/app/Core/Request.php');
 $backupService=(string)file_get_contents(FM_ROOT.'/app/Services/BackupService.php');
+$updateService=(string)file_get_contents(FM_ROOT.'/app/Services/UpdateService.php');
 foreach(['material_type','manufacturer','color'] as $filter)if(!str_contains($materialsView,'name="'.$filter.'"'))throw new RuntimeException('Missing material filter '.$filter);
 if(!str_contains($materialController,"requireRole('admin','manager')")||!str_contains($locationController,"requireRole('admin','manager')"))throw new RuntimeException('Manager write endpoints must enforce roles.');
 if(!str_contains($syncService,"if(\$user['role']==='viewer')throw new HttpException('Permission denied',403)"))throw new RuntimeException('Viewer API mutations must be denied.');
@@ -69,6 +70,8 @@ $forwardedRequest=FilamentManager\Core\Request::capture();
 $_SERVER=$originalServer;
 if($forwardedRequest->bearerToken()!=='forwarded-token')throw new RuntimeException('Forwarded Authorization header cannot be read.');
 if(!str_contains($backupService,'$allowedColumns[$table][$column]'))throw new RuntimeException('Backup restore column whitelist is missing.');
+if(!str_contains($updateService,"str_contains(\$name,'\\\\')")||!str_contains($updateService,'Unsafe path in update archive:'))throw new RuntimeException('Update archive path validation is incomplete.');
+$releaseBuilder=(string)file_get_contents(FM_ROOT.'/tools/build-release.ps1');if(!str_contains($releaseBuilder,".Replace('\\','/')")||str_contains($releaseBuilder,'Compress-Archive -Path $archiveRoot'))throw new RuntimeException('Release archives must use portable forward-slash entry paths.');
 $layout=(string)file_get_contents(FM_ROOT.'/resources/views/layout.php');
 if(!str_contains($layout,'app.css?v='))throw new RuntimeException('Versioned stylesheet cache busting is missing.');
 if(!str_contains($layout,'class="scroll-top"')||!str_contains($layout,'href="#top"'))throw new RuntimeException('Back-to-top control is missing.');

@@ -3,7 +3,7 @@
 return [
     'app_name' => 'FilamentManager', 'dashboard' => 'Printers', 'spools' => 'Spools', 'materials' => 'Materials',
     'users' => 'Users', 'settings' => 'Settings', 'logout' => 'Log out', 'login' => 'Sign in', 'no_releases' => 'No release has been published on GitHub yet.', 'update_check_failed' => 'Update check failed: :message',
-    'username' => 'Username', 'password' => 'Password', 'login_failed' => 'Invalid credentials or a temporarily locked account.',
+    'username' => 'Username', 'password' => 'Password', 'login_failed' => 'Invalid credentials or a temporarily locked account.', 'update_install_failed' => 'The update could not be installed: :message',
     'add_printer' => 'Add printer', 'edit' => 'Edit', 'save' => 'Save', 'delete' => 'Delete', 'cancel' => 'Cancel', 'edit_material' => 'Edit material', 'deleted_success' => 'The item was deleted.',
     'printer_name' => 'Printer name', 'manufacturer' => 'Manufacturer', 'model' => 'Model', 'description' => 'Description',
     'slots' => 'Slots', 'slot' => 'Slot', 'material' => 'Material', 'color' => 'Color', 'remaining' => 'Remaining',

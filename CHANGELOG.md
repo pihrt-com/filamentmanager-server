@@ -4,6 +4,14 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-08-30
+
+### Fixed
+
+- Fixed SQL error 1451 when permanently deleting a revoked mobile device that had processed synchronization mutations.
+- Individual and bulk revoked-device deletion now removes the device-specific idempotency cache before tokens and the device record, while preserving inventory, movement, change, and audit history.
+- Added a migration that changes the synchronization-mutation device foreign key to `ON DELETE CASCADE` for future-safe cleanup.
+
 ## [0.2.2] - 2026-08-30
 
 ### Added

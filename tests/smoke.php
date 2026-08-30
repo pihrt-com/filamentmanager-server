@@ -10,7 +10,7 @@ if(!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 if(FilamentManager\Core\View::dateTime('2026-08-28 14:04:43.965429')!=='2026-08-28 14:04:43')throw new RuntimeException('UI timestamps must omit fractional seconds.');
 $migration=require FM_ROOT.'/database/migrations/001_initial.php';
 if(count($migration)<15)throw new RuntimeException('Initial schema is unexpectedly incomplete.');
-$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php','database/migrations/005_notifications_and_print_jobs.php','bin/notifications.php','tools/filamentmanager-prusaslicer.py','resources/views/print_jobs.php','resources/views/print_job_detail.php'];
+$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php','database/migrations/005_notifications_and_print_jobs.php','database/migrations/006_device_mutation_cleanup.php','bin/notifications.php','tools/filamentmanager-prusaslicer.py','resources/views/print_jobs.php','resources/views/print_job_detail.php'];
 foreach($required as $file)if(!is_file(FM_ROOT.'/'.$file))throw new RuntimeException('Missing '.$file);
 $translations=[];
 foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resources/lang/'.$locale.'/messages.php';}
@@ -68,6 +68,9 @@ if(!str_contains($apiController,'MAX(`sequence`)')||!str_contains($syncService,'
 if(!str_contains($syncService,"\$operation==='delete'||!in_array(\$type,['spool','printer_slot'],true)"))throw new RuntimeException('Operator API permissions are too broad.');
 if(!str_contains($tokenService,'u.id user_id')||!str_contains($tokenService,'issueAccess($row')||!str_contains($tokenService,"'id'=>\$userId"))throw new RuntimeException('Stable device refresh tokens must preserve the user ID.');
 if(!str_contains($settingsView,'connected_devices')||!str_contains($webRoutes,'/admin/settings/device/revoke')||!str_contains($webRoutes,'/admin/settings/device/delete')||!str_contains($webRoutes,'/admin/settings/devices/delete-revoked'))throw new RuntimeException('Connected-device management is incomplete.');
+$settingsControllerSource=(string)file_get_contents(FM_ROOT.'/app/Controllers/SettingsController.php');
+$deviceCleanupMigration=implode("\n",require FM_ROOT.'/database/migrations/006_device_mutation_cleanup.php');
+if(substr_count($settingsControllerSource,'DELETE FROM sync_mutations')<2||!str_contains($deviceCleanupMigration,'ON DELETE CASCADE'))throw new RuntimeException('Revoked-device synchronization mutation cleanup is incomplete.');
 if(!str_contains($settingsView,'server_diagnostics')||!str_contains($settingsView,'View::e($line)'))throw new RuntimeException('Escaped administrator diagnostics are missing.');
 if(!str_contains($tokenService,'$requestedDeviceId')||!str_contains($tokenService,'$canReuse'))throw new RuntimeException('Stable mobile installation IDs are missing.');
 if(!str_contains($requestSource,'REDIRECT_HTTP_AUTHORIZATION')||!str_contains((string)file_get_contents(FM_ROOT.'/.htaccess'),'E=HTTP_AUTHORIZATION')||!str_contains((string)file_get_contents(FM_ROOT.'/public/.htaccess'),'E=HTTP_AUTHORIZATION'))throw new RuntimeException('Authorization header forwarding for Apache/FastCGI is incomplete.');

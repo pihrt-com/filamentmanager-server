@@ -23,6 +23,7 @@ Start with this server README for hosting, administration, API, backup, and upda
 - Printer management with multiple filament slots and operational states
 - Natural A–Z, natural Z–A, or administrator-defined custom printer ordering
 - Manufacturer, material, spool, and hierarchical storage-location records with OpenPrintTag-ready metadata
+- Warehouse inventory grouping and filters plus storage-location details with capacity, free-space, available, loaded, and empty spool visibility
 - Versioned REST API v1 with device authorization, offline synchronization, idempotent mutations, and conflict detection
 - Connected mobile-device overview with one stable record per app installation, immediate administrator-controlled token revocation, and cleanup of revoked devices
 - Portable database and application-data backup and restore

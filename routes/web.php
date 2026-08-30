@@ -55,6 +55,7 @@ $router->get('/materials/{id}/edit', [MaterialController::class, 'index'], [$man
 $router->post('/materials/{id}', [MaterialController::class, 'save'], [$manager]);
 $router->post('/materials/{id}/delete', [MaterialController::class, 'delete'], [$manager]);
 $router->get('/locations', [LocationController::class, 'index'], [$webUser]);
+$router->get('/locations/{id}', [LocationController::class, 'detail'], [$webUser]);
 $router->post('/locations', [LocationController::class, 'save'], [$manager]);
 $router->get('/locations/{id}/edit', [LocationController::class, 'index'], [$manager]);
 $router->post('/locations/{id}', [LocationController::class, 'save'], [$manager]);

@@ -4,6 +4,20 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.1.22] - 2026-08-30
+
+### Added
+
+- Added a grouped available-spool inventory card to Warehouse with combinable manufacturer, material, storage-location, color, and minimum-quantity filters.
+- Added storage-location detail pages showing total, available, loaded, and empty spool counts, grouped material quantities and weights, and every individual spool.
+- Loaded spools assigned to a storage location now show their current printer and slot in that location's detail.
+- Added optional spool capacity to storage locations with occupied and free-space counts and a clear full-location warning; spools currently loaded in printers do not occupy shelf space.
+
+### Changed
+
+- Storage-location names are now buttons linking to the corresponding detail page for every signed-in role.
+- Added complete Czech and English translations and responsive layouts for the expanded warehouse views.
+
 ## [0.1.21] - 2026-08-29
 
 ### Fixed

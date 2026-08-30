@@ -10,7 +10,7 @@ if(!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 if(FilamentManager\Core\View::dateTime('2026-08-28 14:04:43.965429')!=='2026-08-28 14:04:43')throw new RuntimeException('UI timestamps must omit fractional seconds.');
 $migration=require FM_ROOT.'/database/migrations/001_initial.php';
 if(count($migration)<15)throw new RuntimeException('Initial schema is unexpectedly incomplete.');
-$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php'];
+$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php'];
 foreach($required as $file)if(!is_file(FM_ROOT.'/'.$file))throw new RuntimeException('Missing '.$file);
 $translations=[];
 foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resources/lang/'.$locale.'/messages.php';}
@@ -24,6 +24,10 @@ $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
 foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 if(!str_contains($locationController,'$id!==null&&$parent===$id'))throw new RuntimeException('New locations must not trigger the self-parent check.');
+$locationsView=(string)file_get_contents(FM_ROOT.'/resources/views/locations.php');$locationDetailView=(string)file_get_contents(FM_ROOT.'/resources/views/location_detail.php');
+foreach(['manufacturer','material_type','location','color','min_count'] as $filter)if(!str_contains($locationsView,'name="'.$filter.'"'))throw new RuntimeException('Missing warehouse inventory filter '.$filter);
+if(!str_contains($webRoutes,"'/locations/{id}', [LocationController::class, 'detail'], [\$webUser]")||!str_contains($locationController,'printer_slots ps')||!str_contains($locationDetailView,'materialGroups'))throw new RuntimeException('Storage location detail is incomplete.');
+if(!str_contains($locationController,'spool_capacity')||!str_contains($locationsView,'name="spool_capacity"')||!str_contains($locationDetailView,"summary['free']"))throw new RuntimeException('Storage location capacity tracking is incomplete.');
 $spoolController=(string)file_get_contents(FM_ROOT.'/app/Controllers/SpoolController.php');
 $spoolForm=(string)file_get_contents(FM_ROOT.'/resources/views/spool_form.php');
 if(!str_contains($spoolController,'location_id')||!str_contains($spoolForm,'name="location_id"'))throw new RuntimeException('Spool storage-location assignment is missing.');

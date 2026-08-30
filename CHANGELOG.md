@@ -4,6 +4,25 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-08-30
+
+### Added
+
+- Added a persistent PrusaSlicer integration log under the current Windows user's local application-data directory, recording successful submissions and actionable failure details without secrets.
+- Added Czech and English Help and deployment documentation for locating the diagnostic log and resolving outdated Python CA-certificate failures safely.
+- Added manual and automatic import of Prusa binary BGcode version 1, including bounded metadata parsing, CRC32 validation, uncompressed and Deflate metadata, multiple extruders, material type, and color.
+- Added a prominent administrator action above email history to evaluate alerts and send the waiting queue immediately without cron.
+
+### Fixed
+
+- PrusaSlicer HTTP failures now include the server response in diagnostics, while TLS certificate failures clearly require updating Python instead of weakening HTTPS verification.
+- The Windows helper now uses the current certifi CA bundle when installed, preserving strict HTTPS verification on hosting certificate chains that Python's default OpenSSL store cannot validate.
+- Automatic PrusaSlicer imports now use the original exported G-code or BGcode name instead of the temporary post-processing `.pp` filename.
+
+### Changed
+
+- Administrators and managers can permanently delete obsolete print jobs after an explicit warning; previously recorded spool deductions and inventory movements remain intact.
+
 ## [0.2.3] - 2026-08-30
 
 ### Fixed

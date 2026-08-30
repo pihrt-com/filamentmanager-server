@@ -43,6 +43,7 @@ $router->post('/print-jobs/import', [PrintJobController::class, 'import'], [$inv
 $router->get('/print-jobs/{id}', [PrintJobController::class, 'detail'], [$webUser]);
 $router->post('/print-jobs/{id}', [PrintJobController::class, 'update'], [$inventoryEditor]);
 $router->post('/print-jobs/{id}/complete', [PrintJobController::class, 'complete'], [$inventoryEditor]);
+$router->post('/print-jobs/{id}/delete', [PrintJobController::class, 'delete'], [$manager]);
 $router->get('/printers/new', [PrinterController::class, 'form'], [$manager]);
 $router->post('/printers', [PrinterController::class, 'save'], [$manager]);
 $router->get('/printers/{id}/edit', [PrinterController::class, 'form'], [$manager]);

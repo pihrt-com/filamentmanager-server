@@ -4,6 +4,22 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-08-30
+
+### Added
+
+- Added a token-protected HTTPS cron URL for shared hosting that cannot execute the CLI notification worker, including token rotation and last-run/result visibility in Settings.
+- Added queue attempt count and next-attempt time to email history.
+- Limited completed email history to the latest 50 records per workspace while preserving all unfinished deliveries.
+- Displayed both data/database and application-file update backups in Settings so each stored ZIP can be physically deleted.
+
+### Fixed
+
+- Separated immediate pending-email delivery from notification evaluation so the history action retries queued or failed messages immediately.
+- SMTP-disabled delivery is now recorded as a failed attempt with a visible error instead of leaving messages silently queued.
+- Blocked direct web access to the CLI-only `bin` directory and documented the correct CLI and HTTPS cron choices in Czech and English Help and deployment documentation.
+- Backup deletion now verifies that the physical file disappeared, and application-file backups follow the configured retention limit instead of accumulating invisibly.
+
 ## [0.2.4] - 2026-08-30
 
 ### Added

@@ -33,7 +33,7 @@ final class BackupService
         }
         $zip->close();
         @chmod($path, 0640);
-        $this->prune((int)$this->app->config('backup_retention',10));
+        $this->prunePattern('filamentmanager-backup-*.zip',(int)$this->app->config('backup_retention',10));
         return $path;
     }
 
@@ -76,23 +76,24 @@ final class BackupService
         }
         $zip->close();
         @chmod($path, 0640);
+        $this->prunePattern('filamentmanager-files-*.zip',(int)$this->app->config('backup_retention',10));
         return $path;
     }
 
     public function list(): array
     {
-        $files=glob(FM_ROOT.'/storage/backups/filamentmanager-backup-*.zip')?:[];rsort($files,SORT_STRING);return array_map(static fn($p)=>['name'=>basename($p),'size'=>filesize($p),'createdAt'=>gmdate('c',filemtime($p))],$files);
+        $files=array_merge(glob(FM_ROOT.'/storage/backups/filamentmanager-backup-*.zip')?:[],glob(FM_ROOT.'/storage/backups/filamentmanager-files-*.zip')?:[]);usort($files,static fn(string $a,string $b):int=>filemtime($b)<=>filemtime($a));return array_map(static fn($p)=>['name'=>basename($p),'size'=>filesize($p),'createdAt'=>gmdate('c',filemtime($p)),'type'=>str_starts_with(basename($p),'filamentmanager-files-')?'files':'data'],$files);
     }
 
     public function delete(string $name): void
     {
-        if(!preg_match('/^filamentmanager-backup-\d{8}-\d{6}\.zip$/',$name)||basename($name)!==$name)throw new RuntimeException('Invalid backup filename.');
+        if(!preg_match('/^filamentmanager-(?:backup|files)-\d{8}-\d{6}\.zip$/',$name)||basename($name)!==$name)throw new RuntimeException('Invalid backup filename.');
         $path=FM_ROOT.'/storage/backups/'.$name;if(!is_file($path))throw new RuntimeException('Backup file was not found.');
-        if(!unlink($path))throw new RuntimeException('Backup file could not be deleted.');
+        if(!unlink($path))throw new RuntimeException('Backup file could not be deleted.');clearstatcache(true,$path);if(file_exists($path))throw new RuntimeException('Backup file still exists after deletion. Check directory ownership and permissions.');
     }
 
-    private function prune(int $keep): void
+    private function prunePattern(string $pattern,int $keep): void
     {
-        $files=glob(FM_ROOT.'/storage/backups/filamentmanager-backup-*.zip')?:[];rsort($files,SORT_STRING);foreach(array_slice($files,max(1,$keep)) as $file)@unlink($file);
+        $files=glob(FM_ROOT.'/storage/backups/'.$pattern)?:[];rsort($files,SORT_STRING);foreach(array_slice($files,max(1,$keep)) as $file)@unlink($file);
     }
 }

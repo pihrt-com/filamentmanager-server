@@ -10,7 +10,7 @@ if(!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 if(FilamentManager\Core\View::dateTime('2026-08-28 14:04:43.965429')!=='2026-08-28 14:04:43')throw new RuntimeException('UI timestamps must omit fractional seconds.');
 $migration=require FM_ROOT.'/database/migrations/001_initial.php';
 if(count($migration)<15)throw new RuntimeException('Initial schema is unexpectedly incomplete.');
-$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php','database/migrations/005_notifications_and_print_jobs.php','database/migrations/006_device_mutation_cleanup.php','bin/notifications.php','tools/filamentmanager-prusaslicer.py','resources/views/print_jobs.php','resources/views/print_job_detail.php'];
+$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php','database/migrations/005_notifications_and_print_jobs.php','database/migrations/006_device_mutation_cleanup.php','bin/notifications.php','app/Controllers/NotificationCronController.php','app/Services/NotificationCronService.php','tools/filamentmanager-prusaslicer.py','resources/views/print_jobs.php','resources/views/print_job_detail.php'];
 foreach($required as $file)if(!is_file(FM_ROOT.'/'.$file))throw new RuntimeException('Missing '.$file);
 $translations=[];
 foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resources/lang/'.$locale.'/messages.php';}
@@ -23,7 +23,7 @@ foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!arr
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
 foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
 $apiRoutes=(string)file_get_contents(FM_ROOT.'/routes/api.php');
-foreach(['/print-jobs','/print-jobs/{id}/complete','/print-jobs/{id}/delete','/admin/settings/smtp','/admin/settings/notifications/process','/admin/settings/integration-token','/admin/settings/integration-token/revoke','/admin/settings/integration-token/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing print or notification route '.$route);
+foreach(['/print-jobs','/print-jobs/{id}/complete','/print-jobs/{id}/delete','/cron/notifications/{token}','/admin/settings/smtp','/admin/settings/notifications/process','/admin/settings/notifications/send-pending','/admin/settings/notifications/cron-token/rotate','/admin/settings/integration-token','/admin/settings/integration-token/revoke','/admin/settings/integration-token/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing print or notification route '.$route);
 if(!str_contains($apiRoutes,'/api/v1/print-jobs/import')||!str_contains($apiRoutes,'$integrationAuth'))throw new RuntimeException('Restricted PrusaSlicer import route is missing.');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 if(!str_contains($locationController,'$id!==null&&$parent===$id'))throw new RuntimeException('New locations must not trigger the self-parent check.');
@@ -103,6 +103,10 @@ if(!str_contains($cryptoSource,'aes-256-gcm')||!str_contains($cryptoSource,"'fil
 if(function_exists('openssl_encrypt')){$cryptoApp=new FilamentManager\Core\App(['app_key'=>str_repeat('test-key-',8)]);$crypto=new FilamentManager\Services\CryptoService($cryptoApp);$secret='smtp-test-secret';$encrypted=$crypto->encrypt($secret);if($encrypted===$secret||$crypto->decrypt($encrypted)!==$secret)throw new RuntimeException('SMTP secret encryption round trip failed.');}
 $notificationService=(string)file_get_contents(FM_ROOT.'/app/Services/NotificationService.php');
 if(!str_contains($notificationService,"status='sending' AND locked_at<")||!str_contains($notificationService,'rowCount()'))throw new RuntimeException('Mail queue concurrency and abandoned-lock recovery are missing.');
+if(!str_contains($notificationService,'bool $forceDue=false')||!str_contains($notificationService,"SMTP delivery is disabled."))throw new RuntimeException('Immediate queue retry or visible disabled-SMTP failure is missing.');
+if(!str_contains($notificationService,'pruneHistory')||!str_contains($settingsControllerSource,'LIMIT 50'))throw new RuntimeException('Bounded email history is missing.');
+$cronService=(string)file_get_contents(FM_ROOT.'/app/Services/NotificationCronService.php');
+if(!str_contains($cronService,'random_bytes(32)')||!str_contains($cronService,"hash('sha256',\$token)")||!str_contains($cronService,'notification_cron_last_run_at'))throw new RuntimeException('Secure web notification cron is incomplete.');
 $translatorSource=(string)file_get_contents(FM_ROOT.'/app/Core/Translator.php');
 $settingsController=(string)file_get_contents(FM_ROOT.'/app/Controllers/SettingsController.php');
 if(!str_contains($translatorSource,'getForLocale')||!str_contains($settingsController,"getForLocale((string)\$record['locale'],'smtp_test_subject')"))throw new RuntimeException('Localized SMTP test messages are missing.');
@@ -117,6 +121,8 @@ if(!str_contains($postProcessor,'SLIC3R_PP_OUTPUT_NAME')||!str_contains($postPro
 foreach(['_create_unverified_context','CERT_NONE','check_hostname = False'] as $unsafe)if(str_contains($postProcessor,$unsafe))throw new RuntimeException('PrusaSlicer helper weakens HTTPS verification: '.$unsafe);
 $printJobController=(string)file_get_contents(FM_ROOT.'/app/Controllers/PrintJobController.php');$printJobsView=(string)file_get_contents(FM_ROOT.'/resources/views/print_jobs.php');if(!str_contains($printJobController,"['gcode','bgcode']")||!str_contains($printJobsView,'.bgcode'))throw new RuntimeException('Manual BGcode upload is not enabled.');
 if(!str_contains($printJobController,"record('print_job.deleted'")||!str_contains((string)file_get_contents(FM_ROOT.'/resources/views/print_job_detail.php'),'delete_print_job'))throw new RuntimeException('Audited print-job deletion is incomplete.');
-if(!str_contains((string)file_get_contents(FM_ROOT.'/resources/views/settings.php'),'send_pending_now'))throw new RuntimeException('Visible manual email queue action is missing.');
+if(!str_contains((string)file_get_contents(FM_ROOT.'/resources/views/settings.php'),'send_pending_now')||!str_contains((string)file_get_contents(FM_ROOT.'/resources/views/settings.php'),"notificationCron['url']"))throw new RuntimeException('Visible manual email queue or web cron action is missing.');
+if(!str_contains((string)file_get_contents(FM_ROOT.'/.htaccess'),'app|bin|config'))throw new RuntimeException('CLI bin directory must not be web-accessible.');
 if(!str_contains($backupService,'smtp_password_encrypted')||str_contains($backupService,"'integration_tokens'"))throw new RuntimeException('Backup secret exclusions are incomplete.');
+if(!str_contains($backupService,'filamentmanager-files-*.zip')||!str_contains($backupService,'file_exists($path)'))throw new RuntimeException('Application-file backup listing or verified physical deletion is missing.');
 echo "Smoke tests passed.\n";

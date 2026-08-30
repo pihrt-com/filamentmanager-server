@@ -6,7 +6,7 @@ RewriteEngine On
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 RewriteRule (^|/)\. - [F,L]
-RewriteRule ^(?:app|config|database|resources|routes|storage|tests|tools)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:app|bin|config|database|resources|routes|storage|tests|tools)(?:/|$) - [F,L,NC]
 RewriteRule ^(?:README|CHANGELOG|LICENSE|VERSION)(?:\.|$) - [F,L,NC]
 RewriteRule ^assets/(.*)$ public/assets/$1 [L]
 RewriteCond %{REQUEST_FILENAME} !-f

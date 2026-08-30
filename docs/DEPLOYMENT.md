@@ -34,13 +34,15 @@ When the hosting panel cannot change the document root, upload the complete rele
 
 ## Notification cron
 
-After configuring SMTP and per-user notifications, schedule the following command every five minutes using the hosting control panel. Use the absolute PHP binary and project path required by the host:
+After configuring SMTP and per-user notifications, schedule processing every five minutes. If the host supports CLI cron, use the absolute PHP binary and project path required by the host:
 
 ```text
 php /absolute/path/to/filamentmanager/bin/notifications.php
 ```
 
-The worker evaluates current inventory states, creates only newly triggered alerts, retries temporary delivery failures up to five times, and prints a small JSON result suitable for cron logs. It is CLI-only and cannot be invoked through the browser.
+If the hosting control panel supports HTTPS cron only, do not point it at `bin/notifications.php`; that worker is intentionally CLI-only. Open **Settings > Automatic delivery with web cron**, copy the generated secret HTTPS URL, and schedule that exact URL every five minutes. The token grants only notification processing, can be rotated by the administrator, and must not be published.
+
+Both workers evaluate current inventory states, create only newly triggered alerts, retry temporary delivery failures up to five times, and return a small JSON result suitable for cron logs. Settings shows the most recent successful web-cron invocation and its result.
 
 ## Nginx
 

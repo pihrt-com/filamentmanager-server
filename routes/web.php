@@ -13,6 +13,7 @@ use FilamentManager\Controllers\LocationController;
 use FilamentManager\Controllers\AuditController;
 use FilamentManager\Controllers\HelpController;
 use FilamentManager\Controllers\PrintJobController;
+use FilamentManager\Controllers\NotificationCronController;
 use FilamentManager\Core\Router;
 use FilamentManager\Core\Response;
 
@@ -36,6 +37,7 @@ $inventoryEditor = static function ($request, $app): void {
 $router->get('/login', [AuthController::class, 'form']);
 $router->post('/login', [AuthController::class, 'login']);
 $router->post('/logout', [AuthController::class, 'logout'], [$webUser]);
+$router->get('/cron/notifications/{token}', [NotificationCronController::class, 'run']);
 $router->get('/', [DashboardController::class, 'index'], [$webUser]);
 $router->get('/help', [HelpController::class, 'index'], [$webUser]);
 $router->get('/print-jobs', [PrintJobController::class, 'index'], [$webUser]);
@@ -80,6 +82,8 @@ $router->post('/admin/settings/printer-sort', [SettingsController::class, 'saveP
 $router->post('/admin/settings/smtp', [SettingsController::class, 'saveSmtp'], [$admin]);
 $router->post('/admin/settings/smtp/test', [SettingsController::class, 'testSmtp'], [$admin]);
 $router->post('/admin/settings/notifications/process', [SettingsController::class, 'processNotifications'], [$admin]);
+$router->post('/admin/settings/notifications/send-pending', [SettingsController::class, 'sendPendingNotifications'], [$admin]);
+$router->post('/admin/settings/notifications/cron-token/rotate', [SettingsController::class, 'rotateNotificationCronToken'], [$admin]);
 $router->post('/admin/settings/integration-token', [SettingsController::class, 'createIntegrationToken'], [$admin]);
 $router->post('/admin/settings/integration-token/revoke', [SettingsController::class, 'revokeIntegrationToken'], [$admin]);
 $router->post('/admin/settings/integration-token/delete', [SettingsController::class, 'deleteIntegrationToken'], [$admin]);

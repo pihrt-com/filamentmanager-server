@@ -4,6 +4,14 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-08-30
+
+### Added
+
+- Added exact Czech and English Windows instructions to Help for installing the PrusaSlicer helper, creating one CMD wrapper per printer, configuring each printer profile, manually testing import, and protecting the integration token.
+- Added neutral copy-ready command examples that use `example.com` and contain no production server address or real credentials.
+- Added permanent deletion of revoked PrusaSlicer integration-token records; active tokens must be revoked first.
+
 ## [0.2.1] - 2026-08-30
 
 ### Fixed

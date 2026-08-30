@@ -23,7 +23,7 @@ foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!arr
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
 foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
 $apiRoutes=(string)file_get_contents(FM_ROOT.'/routes/api.php');
-foreach(['/print-jobs','/print-jobs/{id}/complete','/admin/settings/smtp','/admin/settings/notifications/process','/admin/settings/integration-token','/admin/settings/integration-token/revoke'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing print or notification route '.$route);
+foreach(['/print-jobs','/print-jobs/{id}/complete','/admin/settings/smtp','/admin/settings/notifications/process','/admin/settings/integration-token','/admin/settings/integration-token/revoke','/admin/settings/integration-token/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing print or notification route '.$route);
 if(!str_contains($apiRoutes,'/api/v1/print-jobs/import')||!str_contains($apiRoutes,'$integrationAuth'))throw new RuntimeException('Restricted PrusaSlicer import route is missing.');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 if(!str_contains($locationController,'$id!==null&&$parent===$id'))throw new RuntimeException('New locations must not trigger the self-parent check.');
@@ -83,6 +83,8 @@ $layout=(string)file_get_contents(FM_ROOT.'/resources/views/layout.php');
 if(!str_contains($layout,'app.css?v='))throw new RuntimeException('Versioned stylesheet cache busting is missing.');
 if(!str_contains($layout,'class="scroll-top"')||!str_contains($layout,'href="#top"'))throw new RuntimeException('Back-to-top control is missing.');
 if(!str_contains($layout,"View::t('help')")||!str_contains($layout,'/help'))throw new RuntimeException('Help navigation is missing.');
+$helpView=(string)file_get_contents(FM_ROOT.'/resources/views/help.php');
+if(!str_contains($helpView,'FILAMENTMANAGER_PRINTER=MK3-1')||!str_contains($helpView,'https://example.com/filamentmanager')||str_contains($helpView,'pihrt.com/filamentmanager'))throw new RuntimeException('Safe copy-ready Windows PrusaSlicer help is incomplete.');
 if(!is_file(FM_ROOT.'/public/assets/app-icon.png')||!str_contains($layout,'/assets/app-icon.png'))throw new RuntimeException('Application icon is missing from the shared layout.');
 foreach(['https://github.com/pihrt-com/filamentmanager-mobile-app','https://play.google.com/store/apps/details?id=com.pihrt.filamentmanager.mobile'] as $mobileLink)if(!str_contains($layout,$mobileLink))throw new RuntimeException('Missing mobile application link '.$mobileLink);
 foreach(["'/printers', [PrinterController::class, 'save'], [\$manager]","'/materials', [MaterialController::class, 'save'], [\$manager]","'/locations', [LocationController::class, 'save'], [\$manager]","'/spools', [SpoolController::class, 'save'], [\$inventoryEditor]"] as $guard)if(!str_contains($webRoutes,$guard))throw new RuntimeException('Missing route-level write authorization: '.$guard);

@@ -81,6 +81,7 @@ $router->post('/admin/settings/smtp/test', [SettingsController::class, 'testSmtp
 $router->post('/admin/settings/notifications/process', [SettingsController::class, 'processNotifications'], [$admin]);
 $router->post('/admin/settings/integration-token', [SettingsController::class, 'createIntegrationToken'], [$admin]);
 $router->post('/admin/settings/integration-token/revoke', [SettingsController::class, 'revokeIntegrationToken'], [$admin]);
+$router->post('/admin/settings/integration-token/delete', [SettingsController::class, 'deleteIntegrationToken'], [$admin]);
 $router->post('/admin/settings/backup/delete', [SettingsController::class, 'deleteBackup'], [$admin]);
 $router->post('/admin/settings/device/revoke', [SettingsController::class, 'revokeDevice'], [$admin]);
 $router->post('/admin/settings/device/delete', [SettingsController::class, 'deleteDevice'], [$admin]);

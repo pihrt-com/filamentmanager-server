@@ -10,7 +10,7 @@ if(!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 if(FilamentManager\Core\View::dateTime('2026-08-28 14:04:43.965429')!=='2026-08-28 14:04:43')throw new RuntimeException('UI timestamps must omit fractional seconds.');
 $migration=require FM_ROOT.'/database/migrations/001_initial.php';
 if(count($migration)<15)throw new RuntimeException('Initial schema is unexpectedly incomplete.');
-$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php'];
+$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php','database/migrations/005_notifications_and_print_jobs.php','bin/notifications.php','tools/filamentmanager-prusaslicer.py','resources/views/print_jobs.php','resources/views/print_job_detail.php'];
 foreach($required as $file)if(!is_file(FM_ROOT.'/'.$file))throw new RuntimeException('Missing '.$file);
 $translations=[];
 foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resources/lang/'.$locale.'/messages.php';}
@@ -18,10 +18,13 @@ $usedKeys=[];
 $translationSources=array_merge(glob(FM_ROOT.'/resources/views/*.php')?:[],glob(FM_ROOT.'/app/Controllers/*.php')?:[]);
 foreach($translationSources as $sourceFile){$source=(string)file_get_contents($sourceFile);preg_match_all("/View::t\\('([^']+)'/",$source,$matches);$usedKeys=array_merge($usedKeys,$matches[1]);if(str_contains($sourceFile,'resources/views')&&(str_contains($source,'style=')||str_contains($source,'<script')))throw new RuntimeException('Strict CSP violation in '.basename($sourceFile));}
 foreach(array_unique($usedKeys) as $key){if(str_ends_with($key,'_'))continue;foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} translation: {$key}");}
-$dynamicKeys=['role_admin','role_manager','role_operator','role_viewer','spool_status_in_stock','spool_status_loaded','spool_status_empty','spool_status_archived','printer_status_active','printer_status_maintenance','printer_status_downtime','printer_status_fault','printer_status_inactive'];
+$dynamicKeys=['role_admin','role_manager','role_operator','role_viewer','spool_status_in_stock','spool_status_loaded','spool_status_empty','spool_status_archived','printer_status_active','printer_status_maintenance','printer_status_downtime','printer_status_fault','printer_status_inactive','print_source_upload','print_source_prusaslicer','print_status_ready','print_status_printing','print_status_completed','print_status_failed','print_status_cancelled','mail_status_queued','mail_status_sending','mail_status_sent','mail_status_failed'];
 foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} dynamic translation: {$key}");
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
 foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
+$apiRoutes=(string)file_get_contents(FM_ROOT.'/routes/api.php');
+foreach(['/print-jobs','/print-jobs/{id}/complete','/admin/settings/smtp','/admin/settings/notifications/process','/admin/settings/integration-token','/admin/settings/integration-token/revoke'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing print or notification route '.$route);
+if(!str_contains($apiRoutes,'/api/v1/print-jobs/import')||!str_contains($apiRoutes,'$integrationAuth'))throw new RuntimeException('Restricted PrusaSlicer import route is missing.');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 if(!str_contains($locationController,'$id!==null&&$parent===$id'))throw new RuntimeException('New locations must not trigger the self-parent check.');
 $locationsView=(string)file_get_contents(FM_ROOT.'/resources/views/locations.php');$locationDetailView=(string)file_get_contents(FM_ROOT.'/resources/views/location_detail.php');
@@ -83,4 +86,18 @@ if(!str_contains($layout,"View::t('help')")||!str_contains($layout,'/help'))thro
 if(!is_file(FM_ROOT.'/public/assets/app-icon.png')||!str_contains($layout,'/assets/app-icon.png'))throw new RuntimeException('Application icon is missing from the shared layout.');
 foreach(['https://github.com/pihrt-com/filamentmanager-mobile-app','https://play.google.com/store/apps/details?id=com.pihrt.filamentmanager.mobile'] as $mobileLink)if(!str_contains($layout,$mobileLink))throw new RuntimeException('Missing mobile application link '.$mobileLink);
 foreach(["'/printers', [PrinterController::class, 'save'], [\$manager]","'/materials', [MaterialController::class, 'save'], [\$manager]","'/locations', [LocationController::class, 'save'], [\$manager]","'/spools', [SpoolController::class, 'save'], [\$inventoryEditor]"] as $guard)if(!str_contains($webRoutes,$guard))throw new RuntimeException('Missing route-level write authorization: '.$guard);
+$notificationMigration=implode("\n",require FM_ROOT.'/database/migrations/005_notifications_and_print_jobs.php');
+foreach(['user_notification_settings','mail_queue','locked_at','print_jobs','print_job_consumptions','integration_tokens'] as $schemaPart)if(!str_contains($notificationMigration,$schemaPart))throw new RuntimeException('Notification/print-job migration is missing '.$schemaPart);
+$parsed=(new FilamentManager\Services\GcodeParser())->parse(FM_ROOT.'/tests/sample.gcode');
+if(count($parsed['consumptions'])!==2||abs((float)$parsed['totalWeightG']-15.75)>0.001||$parsed['consumptions'][0]['materialType']!=='PLA'||$parsed['consumptions'][1]['colorHex']!=='#0000FF')throw new RuntimeException('PrusaSlicer G-code parsing failed.');
+$cryptoSource=(string)file_get_contents(FM_ROOT.'/app/Services/CryptoService.php');
+if(!str_contains($cryptoSource,'aes-256-gcm')||!str_contains($cryptoSource,"'filamentmanager-smtp'"))throw new RuntimeException('Authenticated SMTP secret encryption is missing.');
+if(function_exists('openssl_encrypt')){$cryptoApp=new FilamentManager\Core\App(['app_key'=>str_repeat('test-key-',8)]);$crypto=new FilamentManager\Services\CryptoService($cryptoApp);$secret='smtp-test-secret';$encrypted=$crypto->encrypt($secret);if($encrypted===$secret||$crypto->decrypt($encrypted)!==$secret)throw new RuntimeException('SMTP secret encryption round trip failed.');}
+$notificationService=(string)file_get_contents(FM_ROOT.'/app/Services/NotificationService.php');
+if(!str_contains($notificationService,"status='sending' AND locked_at<")||!str_contains($notificationService,'rowCount()'))throw new RuntimeException('Mail queue concurrency and abandoned-lock recovery are missing.');
+$printJobService=(string)file_get_contents(FM_ROOT.'/app/Services/PrintJobService.php');
+if(!str_contains($printJobService,"'consumed'")||!str_contains($printJobService,'$after-$before')||!str_contains($printJobService,"status='completed'"))throw new RuntimeException('Atomic print completion and consumption movement are incomplete.');
+$postProcessor=(string)file_get_contents(FM_ROOT.'/tools/filamentmanager-prusaslicer.py');
+foreach(['FILAMENTMANAGER_URL','FILAMENTMANAGER_TOKEN','FILAMENTMANAGER_PRINTER','/api/v1/print-jobs/import'] as $part)if(!str_contains($postProcessor,$part))throw new RuntimeException('PrusaSlicer helper is missing '.$part);
+if(!str_contains($backupService,'smtp_password_encrypted')||str_contains($backupService,"'integration_tokens'"))throw new RuntimeException('Backup secret exclusions are incomplete.');
 echo "Smoke tests passed.\n";

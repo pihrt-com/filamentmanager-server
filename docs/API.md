@@ -51,4 +51,10 @@ Supported entity types are `printer`, `printer_slot`, `manufacturer`, `material`
 
 API error responses contain a stable code, message, and request ID. HTTP 401 indicates missing or expired authentication, 403 insufficient permission, 419 an invalid browser CSRF token, 422 invalid input, and 409 a state conflict where applicable.
 
+## PrusaSlicer print-job import
+
+`POST /api/v1/print-jobs/import` uses a dedicated integration Bearer token created and revoked under Administration > Settings. It does not accept mobile access tokens and can only create a ready print job. The JSON body contains `fileName`, `sha256`, either `printerId` or the exact `printerName`, optional metadata, and a `consumptions` array with `extruderIndex`, `estimatedWeightG`, optional `materialType`, and optional `colorHex`.
+
+The endpoint never completes a job or deducts filament. A signed-in operator, manager, or administrator must verify physical spool assignments and explicitly complete the job in the web interface.
+
 For the user-facing Android connection and conflict workflow, see the [FilamentManager Mobile README](https://github.com/pihrt-com/filamentmanager-mobile-app#optional-server-synchronization).

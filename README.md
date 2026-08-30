@@ -24,6 +24,9 @@ Start with this server README for hosting, administration, API, backup, and upda
 - Natural A–Z, natural Z–A, or administrator-defined custom printer ordering
 - Manufacturer, material, spool, and hierarchical storage-location records with OpenPrintTag-ready metadata
 - Warehouse inventory grouping and filters plus storage-location details with capacity, free-space, available, loaded, and empty spool visibility
+- Print jobs with text G-code usage import, per-extruder physical-spool assignment, actual-usage correction, and deduction only after explicit completion
+- Optional PrusaSlicer post-processing helper with restricted, revocable integration tokens
+- Per-user email alerts for empty or low-weight spools, unavailable or low-count materials, and full storage locations, backed by encrypted SMTP settings and a retrying queue
 - Versioned REST API v1 with device authorization, offline synchronization, idempotent mutations, and conflict detection
 - Connected mobile-device overview with one stable record per app installation, immediate administrator-controlled token revocation, and cleanup of revoked devices
 - Portable database and application-data backup and restore
@@ -67,6 +70,10 @@ The installer requires an existing empty database on most shared hosting service
 Administrators can create and download portable ZIP backups and restore them after a clean installation. A backup contains application data, users, printer assignments, inventory, movements, settings, and audit history. It intentionally excludes MySQL credentials, application secrets, sessions, and mobile device tokens.
 
 The dashboard checks GitHub Releases at a limited interval and notifies administrators when a newer semantic version is available. A one-click update requires the administrator password, creates a database backup, downloads the dedicated release package, verifies its SHA-256 checksum, enables maintenance mode, preserves local configuration and storage, copies the release atomically per file, and applies pending database migrations. See [Updates](docs/UPDATES.md) for the release and recovery procedure.
+
+SMTP is configured in Administration > Settings. Notification types and thresholds are configured for each user. For automatic evaluation and delivery, schedule `php bin/notifications.php` every five minutes. SMTP passwords are encrypted with the installation application key and are intentionally excluded from portable backups; enter the password again after restoring onto a clean installation.
+
+Text `.gcode` files can be imported under Print jobs. Filament usage is not deducted during import: verify the printer, physical spool for every extruder, and actual usage before selecting Complete and deduct. Configure `tools/filamentmanager-prusaslicer.py` as a PrusaSlicer post-processing script to create ready jobs automatically. The helper reads metadata only, never modifies G-code, and does not block export when the server is unavailable. See the complete [PrusaSlicer integration guide](docs/PRUSASLICER.md), including Windows setup, security, and troubleshooting.
 
 ## REST API and synchronization
 

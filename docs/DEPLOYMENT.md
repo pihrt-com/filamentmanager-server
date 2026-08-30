@@ -32,6 +32,16 @@ When the hosting panel cannot change the document root, upload the complete rele
 6. Remove `/install/` and `/public/install/` through the hosting file manager or FTP. The `storage/installed.lock` file already blocks reinstalling before these directories are removed.
 7. After installation, use directory mode `0750` for private directories, `0755` for `public/`, file mode `0640` for local configuration, and the least permissive mode that still lets PHP write to `storage/`.
 
+## Notification cron
+
+After configuring SMTP and per-user notifications, schedule the following command every five minutes using the hosting control panel. Use the absolute PHP binary and project path required by the host:
+
+```text
+php /absolute/path/to/filamentmanager/bin/notifications.php
+```
+
+The worker evaluates current inventory states, creates only newly triggered alerts, retries temporary delivery failures up to five times, and prints a small JSON result suitable for cron logs. It is CLI-only and cannot be invoked through the browser.
+
 ## Nginx
 
 Set the document root to the absolute `public/` directory, pass only `public/index.php` to PHP-FPM, use `try_files $uri $uri/ /index.php?$query_string`, deny hidden files, and never expose the project root. The Apache `.htaccess` files have no effect under Nginx.

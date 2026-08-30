@@ -4,6 +4,21 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-30
+
+### Added
+
+- Added per-user email notification preferences for empty spools, low spool weight, unavailable or low-count materials, and full storage locations.
+- Added encrypted SMTP settings, test delivery, a retrying mail queue, delivery history, and a CLI cron worker with state-based duplicate suppression.
+- Added print jobs with safe text G-code metadata import, per-extruder spool assignment, actual-usage correction, and filament deduction only after explicit completion.
+- Added restricted, revocable PrusaSlicer integration tokens and a fail-open post-processing helper that creates ready print jobs without modifying G-code.
+- Expanded the Czech and English Help page with warehouse capacity, print jobs, PrusaSlicer, notifications, synchronization, roles, backups, security, and accuracy guidance.
+
+### Changed
+
+- Backups now include notification preferences and print-job history while excluding SMTP passwords and integration tokens; older backups remain restorable.
+- Server discovery now advertises print-job and email-notification capabilities.
+
 ## [0.1.22] - 2026-08-30
 
 ### Added

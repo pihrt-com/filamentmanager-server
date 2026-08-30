@@ -10,7 +10,9 @@ use ZipArchive;
 
 final class BackupService
 {
-    private const TABLES = ['workspaces','users','devices','manufacturers','materials','locations','spools','printers','printer_slots','spool_movements','settings','sync_changes','audit_log'];
+    private const CORE_TABLES = ['workspaces','users','devices','manufacturers','materials','locations','spools','printers','printer_slots','spool_movements','settings','sync_changes','audit_log'];
+    private const OPTIONAL_TABLES = ['user_notification_settings','notification_states','mail_queue','print_jobs','print_job_consumptions'];
+    private const TABLES = [...self::CORE_TABLES,...self::OPTIONAL_TABLES];
     public function __construct(private readonly App $app) {}
 
     public function create(string $reason = 'manual'): string
@@ -25,6 +27,8 @@ final class BackupService
         $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
         foreach (self::TABLES as $table) {
             $rows = $this->app->db()->fetchAll('SELECT * FROM `' . $table . '`');
+            if($table==='settings')$rows=array_values(array_filter($rows,static fn(array $row):bool=>$row['setting_key']!=='smtp_password_encrypted'));
+            if($table==='print_jobs')foreach($rows as &$row)$row['integration_token_id']=null;unset($row);
             $zip->addFromString('database/' . $table . '.json', json_encode($rows, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR));
         }
         $zip->close();
@@ -43,7 +47,7 @@ final class BackupService
         $manifest = is_string($rawManifest) ? json_decode($rawManifest,true) : null;
         if (!is_array($manifest) || ($manifest['format']??'')!=='filamentmanager-backup' || (int)($manifest['formatVersion']??0)!==1) { $zip->close(); throw new RuntimeException('Unsupported or damaged backup.'); }
         $data=[];$totalUncompressed=0;$maxEntryBytes=128*1024*1024;$maxTotalBytes=512*1024*1024;
-        foreach(self::TABLES as $table){$entry='database/'.$table.'.json';$stat=$zip->statName($entry);$size=is_array($stat)?(int)($stat['size']??0):0;if($size<0||$size>$maxEntryBytes||($totalUncompressed+=$size)>$maxTotalBytes){$zip->close();throw new RuntimeException('Backup contains excessively large data.');}$raw=$zip->getFromName($entry);if(!is_string($raw)){ $zip->close();throw new RuntimeException('Backup is missing table '.$table);}$rows=json_decode($raw,true);if(!is_array($rows)){ $zip->close();throw new RuntimeException('Invalid data for '.$table);}$data[$table]=$rows;}
+        foreach(self::TABLES as $table){$entry='database/'.$table.'.json';$stat=$zip->statName($entry);if(!is_array($stat)&&in_array($table,self::OPTIONAL_TABLES,true)){$data[$table]=[];continue;}$size=is_array($stat)?(int)($stat['size']??0):0;if($size<0||$size>$maxEntryBytes||($totalUncompressed+=$size)>$maxTotalBytes){$zip->close();throw new RuntimeException('Backup contains excessively large data.');}$raw=$zip->getFromName($entry);if(!is_string($raw)){ $zip->close();throw new RuntimeException('Backup is missing table '.$table);}$rows=json_decode($raw,true);if(!is_array($rows)){ $zip->close();throw new RuntimeException('Invalid data for '.$table);}$data[$table]=$rows;}
         $zip->close();
         $pdo=$this->app->db()->pdo();
         $allowedColumns=[];foreach(self::TABLES as $table){$columns=$pdo->query('SHOW COLUMNS FROM `'.$table.'`')->fetchAll(\PDO::FETCH_COLUMN);$allowedColumns[$table]=array_fill_keys($columns,true);}

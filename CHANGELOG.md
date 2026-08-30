@@ -4,6 +4,15 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-30
+
+### Fixed
+
+- Localized SMTP test messages according to the recipient user's configured Czech or English language.
+- Reworked the desktop header to use the available width and wrap cleanly on narrower screens instead of hiding navigation behind horizontal scrolling.
+- Widened the main content area and improved the Users layout, table wrapping, and action visibility.
+- Replaced SMTP and per-user notification checkboxes with accessible on/off switches.
+
 ## [0.2.0] - 2026-08-30
 
 ### Added

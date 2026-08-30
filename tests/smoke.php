@@ -95,6 +95,11 @@ if(!str_contains($cryptoSource,'aes-256-gcm')||!str_contains($cryptoSource,"'fil
 if(function_exists('openssl_encrypt')){$cryptoApp=new FilamentManager\Core\App(['app_key'=>str_repeat('test-key-',8)]);$crypto=new FilamentManager\Services\CryptoService($cryptoApp);$secret='smtp-test-secret';$encrypted=$crypto->encrypt($secret);if($encrypted===$secret||$crypto->decrypt($encrypted)!==$secret)throw new RuntimeException('SMTP secret encryption round trip failed.');}
 $notificationService=(string)file_get_contents(FM_ROOT.'/app/Services/NotificationService.php');
 if(!str_contains($notificationService,"status='sending' AND locked_at<")||!str_contains($notificationService,'rowCount()'))throw new RuntimeException('Mail queue concurrency and abandoned-lock recovery are missing.');
+$translatorSource=(string)file_get_contents(FM_ROOT.'/app/Core/Translator.php');
+$settingsController=(string)file_get_contents(FM_ROOT.'/app/Controllers/SettingsController.php');
+if(!str_contains($translatorSource,'getForLocale')||!str_contains($settingsController,"getForLocale((string)\$record['locale'],'smtp_test_subject')"))throw new RuntimeException('Localized SMTP test messages are missing.');
+$css=(string)file_get_contents(FM_ROOT.'/public/assets/app.css');
+foreach(['.users-grid{grid-template-columns:', '.check-label input[type="checkbox"]', '@media(max-width:1420px)'] as $rule)if(!str_contains($css,$rule))throw new RuntimeException('Responsive user/header switch styling is missing: '.$rule);
 $printJobService=(string)file_get_contents(FM_ROOT.'/app/Services/PrintJobService.php');
 if(!str_contains($printJobService,"'consumed'")||!str_contains($printJobService,'$after-$before')||!str_contains($printJobService,"status='completed'"))throw new RuntimeException('Atomic print completion and consumption movement are incomplete.');
 $postProcessor=(string)file_get_contents(FM_ROOT.'/tools/filamentmanager-prusaslicer.py');

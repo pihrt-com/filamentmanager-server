@@ -31,9 +31,13 @@ $locationsView=(string)file_get_contents(FM_ROOT.'/resources/views/locations.php
 foreach(['manufacturer','material_type','location','color','min_count'] as $filter)if(!str_contains($locationsView,'name="'.$filter.'"'))throw new RuntimeException('Missing warehouse inventory filter '.$filter);
 if(!str_contains($webRoutes,"'/locations/{id}', [LocationController::class, 'detail'], [\$webUser]")||!str_contains($locationController,'printer_slots ps')||!str_contains($locationDetailView,'materialGroups'))throw new RuntimeException('Storage location detail is incomplete.');
 if(!str_contains($locationController,'spool_capacity')||!str_contains($locationsView,'name="spool_capacity"')||!str_contains($locationDetailView,"summary['free']"))throw new RuntimeException('Storage location capacity tracking is incomplete.');
+if(!str_contains($locationController,"s.status IN ('in_stock','loaded')")||!str_contains($locationsView,"group['available_count']")||!str_contains($locationsView,"group['loaded_count']"))throw new RuntimeException('Warehouse total, in-stock, and loaded spool counts are incomplete.');
+foreach(['inventory_overview','inventory_overview_help','in_stock_count','loaded_count'] as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} warehouse translation: {$key}");
 $spoolController=(string)file_get_contents(FM_ROOT.'/app/Controllers/SpoolController.php');
 $spoolForm=(string)file_get_contents(FM_ROOT.'/resources/views/spool_form.php');
 if(!str_contains($spoolController,'location_id')||!str_contains($spoolForm,'name="location_id"'))throw new RuntimeException('Spool storage-location assignment is missing.');
+$spoolsView=(string)file_get_contents(FM_ROOT.'/resources/views/spools.php');
+if(!str_contains($spoolsView,"s['notes']"))throw new RuntimeException('Spool notes are missing from the spool overview.');
 $settingsView=(string)file_get_contents(FM_ROOT.'/resources/views/settings.php');
 $dashboardView=(string)file_get_contents(FM_ROOT.'/resources/views/dashboard.php');
 if(!str_contains($settingsView,"update['commits']"))throw new RuntimeException('Update commit overview is missing.');
@@ -49,6 +53,8 @@ if(!str_contains($webRoutes,"'/help', [HelpController::class, 'index'], [\$webUs
 $printerController=(string)file_get_contents(FM_ROOT.'/app/Controllers/PrinterController.php');
 $printerForm=(string)file_get_contents(FM_ROOT.'/resources/views/printer_form.php');
 if(!is_file(FM_ROOT.'/database/migrations/002_printer_operational_statuses.php')||!str_contains($printerController,"request->input('status','active')")||!str_contains($printerForm,'name="status"')||!str_contains($dashboardView,'is-unavailable'))throw new RuntimeException('Printer operational status support is incomplete.');
+if(!str_contains($printerController,"s.status='in_stock' OR ps.printer_id=?")||!str_contains($printerController,"View::t('spool_loaded_elsewhere')")||!str_contains($printerForm,"spool['notes']"))throw new RuntimeException('Safe, distinguishable printer spool selection is incomplete.');
+foreach(['spool_selection_notes_help','loaded_in_this_printer','spool_loaded_elsewhere'] as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} spool-selection translation: {$key}");
 $materialController=(string)file_get_contents(FM_ROOT.'/app/Controllers/MaterialController.php');
 $materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');

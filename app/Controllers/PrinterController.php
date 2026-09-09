@@ -25,7 +25,7 @@ final class PrinterController
         $printer = $id ? $this->app->db()->fetch('SELECT * FROM printers WHERE id=? AND workspace_id=? AND deleted_at IS NULL', [$id, $user['workspace_id']]) : null;
         if ($id && !$printer) throw new HttpException('Printer not found', 404);
         $slots = $id ? $this->app->db()->fetchAll('SELECT * FROM printer_slots WHERE printer_id=? AND deleted_at IS NULL ORDER BY slot_number', [$id]) : [];
-        $spools = $this->app->db()->fetchAll("SELECT s.id,s.current_net_weight_g,s.status,m.material_type,m.color_name FROM spools s JOIN materials m ON m.id=s.material_id WHERE s.workspace_id=? AND s.deleted_at IS NULL AND (s.status IN ('in_stock','loaded') OR s.id IN (SELECT loaded_spool_id FROM printer_slots WHERE printer_id=?)) ORDER BY m.material_type,m.color_name", [$user['workspace_id'], $id ?? '']);
+        $spools = $this->app->db()->fetchAll("SELECT s.id,s.current_net_weight_g,s.status,s.notes,m.material_type,m.color_name,ps.printer_id loaded_printer_id FROM spools s JOIN materials m ON m.id=s.material_id LEFT JOIN printer_slots ps ON ps.loaded_spool_id=s.id AND ps.deleted_at IS NULL WHERE s.workspace_id=? AND s.deleted_at IS NULL AND (s.status='in_stock' OR ps.printer_id=?) ORDER BY m.material_type,m.color_name,s.notes,s.id", [$user['workspace_id'], $id ?? '']);
         View::render('printer_form', ['title' => $id ? View::t('edit') : View::t('add_printer'), 'printer' => $printer, 'slots' => $slots, 'spools' => $spools, 'basePath' => $request->basePath()]);
     }
 
@@ -69,6 +69,7 @@ final class PrinterController
                 if (!$spoolId) continue;
                 if (!$db->fetch('SELECT id FROM spools WHERE id=? AND workspace_id=? AND deleted_at IS NULL', [$spoolId, $user['workspace_id']])) throw new HttpException('Invalid spool selection', 422);
                 $other = $db->fetch('SELECT * FROM printer_slots WHERE loaded_spool_id=? AND deleted_at IS NULL FOR UPDATE', [$spoolId]);
+                if ($other && $other['printer_id'] !== $id) throw new HttpException(View::t('spool_loaded_elsewhere'), 409);
                 if ($other && ($other['printer_id'] !== $id || (int) $other['slot_number'] !== $targetNumber)) {
                     $db->execute('UPDATE printer_slots SET loaded_spool_id=NULL,version=version+1 WHERE id=?', [$other['id']]);
                     $affectedSlots[$other['id']] = true;

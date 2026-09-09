@@ -4,6 +4,20 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-09-09
+
+### Added
+
+- Added spool notes to the spool overview and printer-slot selections so physically identical spools can be distinguished.
+
+### Changed
+
+- The Warehouse overview now counts both stored and printer-loaded spools and shows the total, in-stock, and loaded quantities separately.
+
+### Fixed
+
+- Printer editing no longer offers spools loaded in other printers or silently transfers a stale selection away from another printer.
+
 ## [0.2.5] - 2026-08-30
 
 ### Added

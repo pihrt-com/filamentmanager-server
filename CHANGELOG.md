@@ -4,6 +4,17 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-09-09
+
+### Added
+
+- Completed print jobs can deduct the saved consumption from the same assigned spools again, with confirmation and a visible deduction counter.
+- Spool status now identifies the exact printer and slot for loaded spools, or the storage location for in-stock spools.
+
+### Changed
+
+- Spool notes are shown with assigned spools in print-job details to distinguish otherwise identical spools.
+
 ## [0.2.6] - 2026-09-09
 
 ### Added

@@ -24,7 +24,7 @@ Start with this server README for hosting, administration, API, backup, and upda
 - Natural A–Z, natural Z–A, or administrator-defined custom printer ordering
 - Manufacturer, material, spool, and hierarchical storage-location records with OpenPrintTag-ready metadata
 - Warehouse inventory grouping and filters with separate total, in-stock, and printer-loaded spool counts plus storage-location details with capacity and free-space visibility
-- Print jobs with `.gcode` and Prusa binary `.bgcode` usage import, per-extruder physical-spool assignment, actual-usage correction, and deduction only after explicit completion
+- Print jobs with `.gcode` and Prusa binary `.bgcode` usage import, per-extruder physical-spool assignment, actual-usage correction, explicit completion, and repeat deduction with a visible counter
 - Optional PrusaSlicer post-processing helper with restricted, revocable integration tokens
 - Per-user email alerts for empty or low-weight spools, unavailable or low-count materials, and full storage locations, backed by encrypted SMTP settings and a retrying queue
 - Versioned REST API v1 with device authorization, offline synchronization, idempotent mutations, and conflict detection

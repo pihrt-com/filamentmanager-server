@@ -27,7 +27,27 @@ final class PrintJobService
 
     public function complete(string $workspaceId,string $jobId,string $userId): void
     {
-        $this->app->db()->transaction(function($db)use($workspaceId,$jobId,$userId):void{$job=$db->fetch('SELECT * FROM print_jobs WHERE id=? AND workspace_id=? FOR UPDATE',[$jobId,$workspaceId]);if(!$job)throw new HttpException('Print job not found',404);if($job['status']==='completed')throw new HttpException('The print job was already completed',409);if(in_array($job['status'],['failed','cancelled'],true))throw new HttpException('A closed print job cannot be completed',409);$items=$db->fetchAll('SELECT * FROM print_job_consumptions WHERE job_id=? ORDER BY extruder_index FOR UPDATE',[$jobId]);$seen=[];foreach($items as $item){if(!$item['spool_id'])throw new HttpException('Assign a spool to every used extruder before completing the print',422);if(isset($seen[$item['spool_id']]))throw new HttpException('Each extruder must use a different spool',422);$seen[$item['spool_id']]=true;$spool=$db->fetch('SELECT * FROM spools WHERE id=? AND workspace_id=? AND deleted_at IS NULL FOR UPDATE',[$item['spool_id'],$workspaceId]);if(!$spool)throw new HttpException('An assigned spool no longer exists',409);$used=$item['actual_weight_g']!==null?(float)$item['actual_weight_g']:(float)$item['estimated_weight_g'];$before=(float)$spool['current_net_weight_g'];$after=max(0,$before-$used);$status=$spool['status']==='loaded'?'loaded':($after<=0?'empty':$spool['status']);$version=(int)$spool['version']+1;$db->execute('UPDATE spools SET current_net_weight_g=?,status=?,version=? WHERE id=?',[$after,$status,$version,$spool['id']]);$db->execute('UPDATE print_job_consumptions SET actual_weight_g=?,weight_before_g=?,weight_after_g=? WHERE id=?',[$used,$before,$after,$item['id']]);$db->execute('INSERT INTO spool_movements(id,workspace_id,spool_id,movement_type,printer_id,weight_before_g,weight_after_g,weight_delta_g,source,user_id,notes) VALUES(?,?,?,?,?,?,?,?,?,?,?)',[Uuid::v4(),$workspaceId,$spool['id'],'consumed',$job['printer_id'],$before,$after,$after-$before,'import',$userId,'Print job '.$job['source_file_name']]);(new ChangeService($this->app))->record($workspaceId,'spool',$spool['id'],'upsert',$version,$userId);}$db->execute("UPDATE print_jobs SET status='completed',started_at=COALESCE(started_at,created_at),completed_at=UTC_TIMESTAMP(6) WHERE id=?",[$jobId]);});
+        $this->deduct($workspaceId,$jobId,$userId,false);
+    }
+
+    public function repeat(string $workspaceId,string $jobId,string $userId): int
+    {
+        return $this->deduct($workspaceId,$jobId,$userId,true);
+    }
+
+    private function deduct(string $workspaceId,string $jobId,string $userId,bool $repeat): int
+    {
+        $deductionCount=0;
+        $this->app->db()->transaction(function($db)use($workspaceId,$jobId,$userId,$repeat,&$deductionCount):void{
+            $job=$db->fetch('SELECT * FROM print_jobs WHERE id=? AND workspace_id=? FOR UPDATE',[$jobId,$workspaceId]);
+            if(!$job)throw new HttpException('Print job not found',404);
+            if($repeat){if($job['status']!=='completed')throw new HttpException('Only a completed print job can be deducted again',409);}else{if($job['status']==='completed')throw new HttpException('The print job was already completed',409);if(in_array($job['status'],['failed','cancelled'],true))throw new HttpException('A closed print job cannot be completed',409);}
+            $deductionCount=max(0,(int)($job['deduction_count']??0))+1;
+            $items=$db->fetchAll('SELECT * FROM print_job_consumptions WHERE job_id=? ORDER BY extruder_index FOR UPDATE',[$jobId]);$seen=[];
+            foreach($items as $item){if(!$item['spool_id'])throw new HttpException('Assign a spool to every used extruder before completing the print',422);if(isset($seen[$item['spool_id']]))throw new HttpException('Each extruder must use a different spool',422);$seen[$item['spool_id']]=true;$spool=$db->fetch('SELECT * FROM spools WHERE id=? AND workspace_id=? AND deleted_at IS NULL FOR UPDATE',[$item['spool_id'],$workspaceId]);if(!$spool)throw new HttpException('An assigned spool no longer exists',409);$used=$item['actual_weight_g']!==null?(float)$item['actual_weight_g']:(float)$item['estimated_weight_g'];$before=(float)$spool['current_net_weight_g'];$after=max(0,$before-$used);$status=$spool['status']==='loaded'?'loaded':($after<=0?'empty':$spool['status']);$version=(int)$spool['version']+1;$db->execute('UPDATE spools SET current_net_weight_g=?,status=?,version=? WHERE id=?',[$after,$status,$version,$spool['id']]);$db->execute('UPDATE print_job_consumptions SET actual_weight_g=?,weight_before_g=?,weight_after_g=? WHERE id=?',[$used,$before,$after,$item['id']]);$db->execute('INSERT INTO spool_movements(id,workspace_id,spool_id,movement_type,printer_id,weight_before_g,weight_after_g,weight_delta_g,source,user_id,notes) VALUES(?,?,?,?,?,?,?,?,?,?,?)',[Uuid::v4(),$workspaceId,$spool['id'],'consumed',$job['printer_id'],$before,$after,$after-$before,'import',$userId,'Print job '.$job['source_file_name'].' · deduction #'.$deductionCount]);(new ChangeService($this->app))->record($workspaceId,'spool',$spool['id'],'upsert',$version,$userId);}
+            if($repeat)$db->execute('UPDATE print_jobs SET deduction_count=? WHERE id=?',[$deductionCount,$jobId]);else $db->execute("UPDATE print_jobs SET status='completed',started_at=COALESCE(started_at,created_at),completed_at=UTC_TIMESTAMP(6),deduction_count=? WHERE id=?",[$deductionCount,$jobId]);
+        });
+        return $deductionCount;
     }
 
     private function normaliseConsumptions(array $items): array

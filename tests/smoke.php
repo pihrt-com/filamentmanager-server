@@ -10,7 +10,7 @@ if(!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 if(FilamentManager\Core\View::dateTime('2026-08-28 14:04:43.965429')!=='2026-08-28 14:04:43')throw new RuntimeException('UI timestamps must omit fractional seconds.');
 $migration=require FM_ROOT.'/database/migrations/001_initial.php';
 if(count($migration)<15)throw new RuntimeException('Initial schema is unexpectedly incomplete.');
-$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php','database/migrations/005_notifications_and_print_jobs.php','database/migrations/006_device_mutation_cleanup.php','bin/notifications.php','app/Controllers/NotificationCronController.php','app/Services/NotificationCronService.php','tools/filamentmanager-prusaslicer.py','resources/views/print_jobs.php','resources/views/print_job_detail.php'];
+$required=['README.md','CHANGELOG.md','SECURITY.md','prepare-install.php','public/index.php','install/index.php','routes/web.php','routes/api.php','database/migrations/003_printer_sort_mode.php','database/migrations/004_location_spool_capacity.php','database/migrations/005_notifications_and_print_jobs.php','database/migrations/006_device_mutation_cleanup.php','database/migrations/007_print_job_repeat_count.php','bin/notifications.php','app/Controllers/NotificationCronController.php','app/Services/NotificationCronService.php','tools/filamentmanager-prusaslicer.py','resources/views/print_jobs.php','resources/views/print_job_detail.php'];
 foreach($required as $file)if(!is_file(FM_ROOT.'/'.$file))throw new RuntimeException('Missing '.$file);
 $translations=[];
 foreach(['cs','en'] as $locale){$translations[$locale]=require FM_ROOT.'/resources/lang/'.$locale.'/messages.php';}
@@ -23,7 +23,7 @@ foreach($dynamicKeys as $key)foreach($translations as $locale=>$messages)if(!arr
 $webRoutes=(string)file_get_contents(FM_ROOT.'/routes/web.php');
 foreach(['/materials/{id}/edit','/materials/{id}','/locations/{id}/edit','/locations/{id}','/admin/users/{id}/edit','/admin/users/{id}','/admin/users/{id}/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing web route '.$route);
 $apiRoutes=(string)file_get_contents(FM_ROOT.'/routes/api.php');
-foreach(['/print-jobs','/print-jobs/{id}/complete','/print-jobs/{id}/delete','/cron/notifications/{token}','/admin/settings/smtp','/admin/settings/notifications/process','/admin/settings/notifications/send-pending','/admin/settings/notifications/cron-token/rotate','/admin/settings/integration-token','/admin/settings/integration-token/revoke','/admin/settings/integration-token/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing print or notification route '.$route);
+foreach(['/print-jobs','/print-jobs/{id}/complete','/print-jobs/{id}/repeat','/print-jobs/{id}/delete','/cron/notifications/{token}','/admin/settings/smtp','/admin/settings/notifications/process','/admin/settings/notifications/send-pending','/admin/settings/notifications/cron-token/rotate','/admin/settings/integration-token','/admin/settings/integration-token/revoke','/admin/settings/integration-token/delete'] as $route)if(!str_contains($webRoutes,$route))throw new RuntimeException('Missing print or notification route '.$route);
 if(!str_contains($apiRoutes,'/api/v1/print-jobs/import')||!str_contains($apiRoutes,'$integrationAuth'))throw new RuntimeException('Restricted PrusaSlicer import route is missing.');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');
 if(!str_contains($locationController,'$id!==null&&$parent===$id'))throw new RuntimeException('New locations must not trigger the self-parent check.');
@@ -38,6 +38,7 @@ $spoolForm=(string)file_get_contents(FM_ROOT.'/resources/views/spool_form.php');
 if(!str_contains($spoolController,'location_id')||!str_contains($spoolForm,'name="location_id"'))throw new RuntimeException('Spool storage-location assignment is missing.');
 $spoolsView=(string)file_get_contents(FM_ROOT.'/resources/views/spools.php');
 if(!str_contains($spoolsView,"s['notes']"))throw new RuntimeException('Spool notes are missing from the spool overview.');
+if(!str_contains($spoolController,'printer_name')||!str_contains($spoolController,'slot_number')||!str_contains($spoolsView,'spool_loaded_position')||!str_contains($spoolsView,'spool_stored_position'))throw new RuntimeException('Detailed spool placement status is incomplete.');
 $settingsView=(string)file_get_contents(FM_ROOT.'/resources/views/settings.php');
 $dashboardView=(string)file_get_contents(FM_ROOT.'/resources/views/dashboard.php');
 if(!str_contains($settingsView,"update['commits']"))throw new RuntimeException('Update commit overview is missing.');
@@ -99,6 +100,8 @@ foreach(['https://github.com/pihrt-com/filamentmanager-mobile-app','https://play
 foreach(["'/printers', [PrinterController::class, 'save'], [\$manager]","'/materials', [MaterialController::class, 'save'], [\$manager]","'/locations', [LocationController::class, 'save'], [\$manager]","'/spools', [SpoolController::class, 'save'], [\$inventoryEditor]"] as $guard)if(!str_contains($webRoutes,$guard))throw new RuntimeException('Missing route-level write authorization: '.$guard);
 $notificationMigration=implode("\n",require FM_ROOT.'/database/migrations/005_notifications_and_print_jobs.php');
 foreach(['user_notification_settings','mail_queue','locked_at','print_jobs','print_job_consumptions','integration_tokens'] as $schemaPart)if(!str_contains($notificationMigration,$schemaPart))throw new RuntimeException('Notification/print-job migration is missing '.$schemaPart);
+$repeatMigration=implode("\n",require FM_ROOT.'/database/migrations/007_print_job_repeat_count.php');
+if(!str_contains($repeatMigration,'deduction_count')||!str_contains($repeatMigration,"status='completed'"))throw new RuntimeException('Print-job deduction-count migration is incomplete.');
 $parsed=(new FilamentManager\Services\GcodeParser())->parse(FM_ROOT.'/tests/sample.gcode');
 if(count($parsed['consumptions'])!==2||abs((float)$parsed['totalWeightG']-15.75)>0.001||$parsed['consumptions'][0]['materialType']!=='PLA'||$parsed['consumptions'][1]['colorHex']!=='#0000FF')throw new RuntimeException('PrusaSlicer G-code parsing failed.');
 $bgcodeBlock=static function(int $type,string $data,int $compression=0):string{$parameters=pack('v',0);$encoded=$compression===1?gzcompress($data):$data;$header=$compression===0?pack('vvV',$type,0,strlen($data)):pack('vvVV',$type,$compression,strlen($data),strlen($encoded));$payload=$header.$parameters.$encoded;return $payload.pack('V',crc32($payload));};
@@ -120,6 +123,7 @@ $css=(string)file_get_contents(FM_ROOT.'/public/assets/app.css');
 foreach(['.users-grid{grid-template-columns:', '.check-label input[type="checkbox"]', '@media(max-width:1420px)'] as $rule)if(!str_contains($css,$rule))throw new RuntimeException('Responsive user/header switch styling is missing: '.$rule);
 $printJobService=(string)file_get_contents(FM_ROOT.'/app/Services/PrintJobService.php');
 if(!str_contains($printJobService,"'consumed'")||!str_contains($printJobService,'$after-$before')||!str_contains($printJobService,"status='completed'"))throw new RuntimeException('Atomic print completion and consumption movement are incomplete.');
+if(!str_contains($printJobService,'function repeat')||!str_contains($printJobService,'deduction_count')||!str_contains($printJobService,'deduction #'))throw new RuntimeException('Repeat print-job deduction is incomplete.');
 $postProcessor=(string)file_get_contents(FM_ROOT.'/tools/filamentmanager-prusaslicer.py');
 foreach(['FILAMENTMANAGER_URL','FILAMENTMANAGER_TOKEN','FILAMENTMANAGER_PRINTER','/api/v1/print-jobs/import','parse_bgcode','certifi.where'] as $part)if(!str_contains($postProcessor,$part))throw new RuntimeException('PrusaSlicer helper is missing '.$part);
 foreach(['filamentmanager-prusaslicer.log','HTTPError','SSLCertVerificationError'] as $part)if(!str_contains($postProcessor,$part))throw new RuntimeException('PrusaSlicer diagnostics are missing '.$part);
@@ -127,6 +131,8 @@ if(!str_contains($postProcessor,'SLIC3R_PP_OUTPUT_NAME')||!str_contains($postPro
 foreach(['_create_unverified_context','CERT_NONE','check_hostname = False'] as $unsafe)if(str_contains($postProcessor,$unsafe))throw new RuntimeException('PrusaSlicer helper weakens HTTPS verification: '.$unsafe);
 $printJobController=(string)file_get_contents(FM_ROOT.'/app/Controllers/PrintJobController.php');$printJobsView=(string)file_get_contents(FM_ROOT.'/resources/views/print_jobs.php');if(!str_contains($printJobController,"['gcode','bgcode']")||!str_contains($printJobsView,'.bgcode'))throw new RuntimeException('Manual BGcode upload is not enabled.');
 if(!str_contains($printJobController,"record('print_job.deleted'")||!str_contains((string)file_get_contents(FM_ROOT.'/resources/views/print_job_detail.php'),'delete_print_job'))throw new RuntimeException('Audited print-job deletion is incomplete.');
+$printJobDetailView=(string)file_get_contents(FM_ROOT.'/resources/views/print_job_detail.php');
+if(!str_contains($printJobsView,'deduction_count')||!str_contains($printJobDetailView,'repeat_deduction')||!str_contains($printJobDetailView,'spool_notes'))throw new RuntimeException('Repeat-deduction controls, count, or spool notes are missing from print jobs.');
 if(!str_contains((string)file_get_contents(FM_ROOT.'/resources/views/settings.php'),'send_pending_now')||!str_contains((string)file_get_contents(FM_ROOT.'/resources/views/settings.php'),"notificationCron['url']"))throw new RuntimeException('Visible manual email queue or web cron action is missing.');
 if(!str_contains((string)file_get_contents(FM_ROOT.'/.htaccess'),'app|bin|config'))throw new RuntimeException('CLI bin directory must not be web-accessible.');
 if(!str_contains($backupService,'smtp_password_encrypted')||str_contains($backupService,"'integration_tokens'"))throw new RuntimeException('Backup secret exclusions are incomplete.');

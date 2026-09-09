@@ -5,4 +5,3 @@
 *.js text eol=lf
 *.png binary
 *.zip binary
-.codex export-ignore

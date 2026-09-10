@@ -4,6 +4,12 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+### Changed
+
+- Material selection when creating or editing a spool now shows manufacturer, material type, color, commercial name, and diameter.
+- Printer-slot spool selection now shows manufacturer, commercial name, weight, storage location, notes, batch, and a short unique spool ID; the empty option is labelled as unloading.
+- Warehouse storage-location links use button styling, and hovering or focusing a loaded-spool count reveals the printer names.
+
 ## [0.2.7] - 2026-09-09
 
 ### Added

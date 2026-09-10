@@ -39,6 +39,8 @@ if(!str_contains($spoolController,'location_id')||!str_contains($spoolForm,'name
 $spoolsView=(string)file_get_contents(FM_ROOT.'/resources/views/spools.php');
 if(!str_contains($spoolsView,"s['notes']"))throw new RuntimeException('Spool notes are missing from the spool overview.');
 if(!str_contains($spoolController,'printer_name')||!str_contains($spoolController,'slot_number')||!str_contains($spoolsView,'spool_loaded_position')||!str_contains($spoolsView,'spool_stored_position'))throw new RuntimeException('Detailed spool placement status is incomplete.');
+$spoolFormView=(string)file_get_contents(FM_ROOT.'/resources/views/spool_form.php');
+if(!str_contains($spoolController,'manufacturer_name')||!str_contains($spoolController,'diameter_mm')||!str_contains($spoolFormView,'material_selection_help'))throw new RuntimeException('Detailed material selection for spools is incomplete.');
 $settingsView=(string)file_get_contents(FM_ROOT.'/resources/views/settings.php');
 $dashboardView=(string)file_get_contents(FM_ROOT.'/resources/views/dashboard.php');
 if(!str_contains($settingsView,"update['commits']"))throw new RuntimeException('Update commit overview is missing.');
@@ -55,7 +57,10 @@ $printerController=(string)file_get_contents(FM_ROOT.'/app/Controllers/PrinterCo
 $printerForm=(string)file_get_contents(FM_ROOT.'/resources/views/printer_form.php');
 if(!is_file(FM_ROOT.'/database/migrations/002_printer_operational_statuses.php')||!str_contains($printerController,"request->input('status','active')")||!str_contains($printerForm,'name="status"')||!str_contains($dashboardView,'is-unavailable'))throw new RuntimeException('Printer operational status support is incomplete.');
 if(!str_contains($printerController,"s.status='in_stock' OR ps.printer_id=?")||!str_contains($printerController,"View::t('spool_loaded_elsewhere')")||!str_contains($printerForm,"spool['notes']"))throw new RuntimeException('Safe, distinguishable printer spool selection is incomplete.');
+foreach(['manufacturer_name','commercial_name','location_name','batch_number'] as $field)if(!str_contains($printerController,$field)||!str_contains($printerForm,$field))throw new RuntimeException('Printer spool selection is missing '.$field);
+if(!str_contains($printerForm,"View::t('unload')")||!str_contains($printerForm,"substr((string)\$spool['id'],0,8)"))throw new RuntimeException('Explicit unload or unique spool ID is missing from printer slots.');
 foreach(['spool_selection_notes_help','loaded_in_this_printer','spool_loaded_elsewhere'] as $key)foreach($translations as $locale=>$messages)if(!array_key_exists($key,$messages))throw new RuntimeException("Missing {$locale} spool-selection translation: {$key}");
+if(!str_contains($locationController,'loaded_printers')||!str_contains($locationsView,'warehouse-loaded-preview')||substr_count($locationsView,'location-detail-button')<2)throw new RuntimeException('Warehouse printer preview or location buttons are incomplete.');
 $materialController=(string)file_get_contents(FM_ROOT.'/app/Controllers/MaterialController.php');
 $materialsView=(string)file_get_contents(FM_ROOT.'/resources/views/materials.php');
 $locationController=(string)file_get_contents(FM_ROOT.'/app/Controllers/LocationController.php');

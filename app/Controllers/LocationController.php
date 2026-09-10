@@ -28,7 +28,7 @@ final class LocationController
         if($id&&!$editing)throw new HttpException('Location not found',404);
         $locations=$this->app->db()->fetchAll("SELECT l.*,p.name parent_name,(SELECT COUNT(*) FROM spools s WHERE s.location_id=l.id AND s.deleted_at IS NULL) spool_count,(SELECT COUNT(*) FROM spools s WHERE s.location_id=l.id AND s.deleted_at IS NULL AND s.status IN ('in_stock','empty') AND NOT EXISTS (SELECT 1 FROM printer_slots ps WHERE ps.loaded_spool_id=s.id AND ps.deleted_at IS NULL)) stored_count FROM locations l LEFT JOIN locations p ON p.id=l.parent_id WHERE l.workspace_id=? AND l.deleted_at IS NULL ORDER BY COALESCE(p.name,''),l.name",[$user['workspace_id']]);
 
-        $allInventory=$this->app->db()->fetchAll("SELECT s.id,s.material_id,s.location_id,s.status,s.current_net_weight_g,m.material_type,m.commercial_name,m.color_name,m.color_hex,mf.id manufacturer_id,mf.name manufacturer_name,l.name location_name,l.code location_code,ps.id loaded_slot_id FROM spools s JOIN materials m ON m.id=s.material_id LEFT JOIN manufacturers mf ON mf.id=m.manufacturer_id LEFT JOIN locations l ON l.id=s.location_id LEFT JOIN printer_slots ps ON ps.loaded_spool_id=s.id AND ps.deleted_at IS NULL WHERE s.workspace_id=? AND s.deleted_at IS NULL AND s.status IN ('in_stock','loaded') ORDER BY m.material_type,m.color_name,l.name",[$user['workspace_id']]);
+        $allInventory=$this->app->db()->fetchAll("SELECT s.id,s.material_id,s.location_id,s.status,s.current_net_weight_g,m.material_type,m.commercial_name,m.color_name,m.color_hex,mf.id manufacturer_id,mf.name manufacturer_name,l.name location_name,l.code location_code,ps.id loaded_slot_id,p.name printer_name FROM spools s JOIN materials m ON m.id=s.material_id LEFT JOIN manufacturers mf ON mf.id=m.manufacturer_id LEFT JOIN locations l ON l.id=s.location_id LEFT JOIN printer_slots ps ON ps.loaded_spool_id=s.id AND ps.deleted_at IS NULL LEFT JOIN printers p ON p.id=ps.printer_id AND p.deleted_at IS NULL WHERE s.workspace_id=? AND s.deleted_at IS NULL AND s.status IN ('in_stock','loaded') ORDER BY m.material_type,m.color_name,l.name",[$user['workspace_id']]);
         foreach($allInventory as &$spool)$spool['display_status']=$spool['loaded_slot_id']?'loaded':'in_stock';
         unset($spool);
         $selected=['manufacturer'=>(string)$request->query('manufacturer'),'material_type'=>(string)$request->query('material_type'),'location'=>(string)$request->query('location'),'color'=>(string)$request->query('color'),'min_count'=>max(1,min(9999,(int)$request->query('min_count',1)))];
@@ -68,7 +68,20 @@ final class LocationController
     private function groupSpools(array $spools, bool $includeLocation): array
     {
         $groups=[];
-        foreach($spools as $spool){$key=(string)$spool['material_id'].($includeLocation?'|'.(string)($spool['location_id']??''):'');if(!isset($groups[$key]))$groups[$key]=['material_id'=>$spool['material_id'],'material_type'=>$spool['material_type'],'commercial_name'=>$spool['commercial_name'],'color_name'=>$spool['color_name'],'color_hex'=>$spool['color_hex'],'manufacturer_name'=>$spool['manufacturer_name'],'location_id'=>$spool['location_id']??null,'location_name'=>$spool['location_name']??null,'location_code'=>$spool['location_code']??null,'spool_count'=>0,'available_count'=>0,'loaded_count'=>0,'total_weight_g'=>0.0];$groups[$key]['spool_count']++;$groups[$key]['total_weight_g']+=(float)$spool['current_net_weight_g'];$status=$spool['display_status']??$spool['status']??'in_stock';if($status==='loaded')$groups[$key]['loaded_count']++;elseif($status==='in_stock')$groups[$key]['available_count']++;}
+        foreach($spools as $spool){
+            $key=(string)$spool['material_id'].($includeLocation?'|'.(string)($spool['location_id']??''):'');
+            if(!isset($groups[$key]))$groups[$key]=['material_id'=>$spool['material_id'],'material_type'=>$spool['material_type'],'commercial_name'=>$spool['commercial_name'],'color_name'=>$spool['color_name'],'color_hex'=>$spool['color_hex'],'manufacturer_name'=>$spool['manufacturer_name'],'location_id'=>$spool['location_id']??null,'location_name'=>$spool['location_name']??null,'location_code'=>$spool['location_code']??null,'spool_count'=>0,'available_count'=>0,'loaded_count'=>0,'loaded_printers'=>[],'total_weight_g'=>0.0];
+            $groups[$key]['spool_count']++;
+            $groups[$key]['total_weight_g']+=(float)$spool['current_net_weight_g'];
+            $status=$spool['display_status']??$spool['status']??'in_stock';
+            if($status==='loaded'){
+                $groups[$key]['loaded_count']++;
+                $printerName=trim((string)($spool['printer_name']??''));
+                if($printerName!=='')$groups[$key]['loaded_printers'][$printerName]=$printerName;
+            }elseif($status==='in_stock')$groups[$key]['available_count']++;
+        }
+        foreach($groups as &$group){natcasesort($group['loaded_printers']);$group['loaded_printers']=array_values($group['loaded_printers']);}
+        unset($group);
         return array_values($groups);
     }
 

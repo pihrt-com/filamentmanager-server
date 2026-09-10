@@ -32,6 +32,14 @@ Start with this server README for hosting, administration, API, backup, and upda
 - Portable database and application-data backup and restore
 - GitHub Release update checks, SHA-256 package verification, automatic pre-update backup, migrations, and application-file rollback
 
+## Recent changes
+
+### 2026-09-10 — GitHub/filamentmanager-server
+
+- Expanded material and physical-spool labels in spool and printer forms so similar products and spools can be reliably distinguished.
+- Replaced the empty printer-slot marker with an explicit unload action.
+- Styled warehouse location links as buttons and added printer-name previews to loaded-spool counts.
+
 ## Screenshots
 
 | Printers | Printer editing |

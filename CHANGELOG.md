@@ -1,14 +1,14 @@
 # Changelog
 
-All notable changes to FilamentManager Server are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
+## 0.2.9 - 2026-09-10
 
-## [Unreleased]
+- Fixed duplicate manufacturer errors when synchronizing newly created spools.
+- Reused existing manufacturers without overwriting their metadata or version.
+- Added persistent manufacturer aliases to recover queued material references across batches and retries, including changes from older mobile apps.
+- Included manufacturer aliases in backup and restore; deleted manufacturer names return a controlled conflict.
+- Added migration 008 and regression tests for manufacturer synchronization.
 
-### Fixed — 2026-09-10
-
-- Server sync reuses existing manufacturer names without overwriting metadata. Persistent workspace-scoped aliases repair material references across batches/retries, including pending changes from older apps. Apply migration 008 before serving sync requests. Deleted manufacturer names return HTTP 409. Backup/restore includes aliases.
-
-## [0.2.8] - 2026-09-10
+## 0.2.8 - 2026-09-10
 
 ### Changed
 
@@ -16,7 +16,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Printer-slot spool selection now shows manufacturer, commercial name, weight, storage location, notes, batch, and a short unique spool ID; the empty option is labelled as unloading.
 - Warehouse storage-location links use button styling, and hovering or focusing a loaded-spool count reveals the printer names.
 
-## [0.2.7] - 2026-09-09
+## 0.2.7 - 2026-09-09
 
 ### Added
 
@@ -27,7 +27,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Spool notes are shown with assigned spools in print-job details to distinguish otherwise identical spools.
 
-## [0.2.6] - 2026-09-09
+## 0.2.6 - 2026-09-09
 
 ### Added
 
@@ -41,7 +41,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Printer editing no longer offers spools loaded in other printers or silently transfers a stale selection away from another printer.
 
-## [0.2.5] - 2026-08-30
+## 0.2.5 - 2026-08-30
 
 ### Added
 
@@ -57,7 +57,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Blocked direct web access to the CLI-only `bin` directory and documented the correct CLI and HTTPS cron choices in Czech and English Help and deployment documentation.
 - Backup deletion now verifies that the physical file disappeared, and application-file backups follow the configured retention limit instead of accumulating invisibly.
 
-## [0.2.4] - 2026-08-30
+## 0.2.4 - 2026-08-30
 
 ### Added
 
@@ -76,7 +76,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Administrators and managers can permanently delete obsolete print jobs after an explicit warning; previously recorded spool deductions and inventory movements remain intact.
 
-## [0.2.3] - 2026-08-30
+## 0.2.3 - 2026-08-30
 
 ### Fixed
 
@@ -84,7 +84,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Individual and bulk revoked-device deletion now removes the device-specific idempotency cache before tokens and the device record, while preserving inventory, movement, change, and audit history.
 - Added a migration that changes the synchronization-mutation device foreign key to `ON DELETE CASCADE` for future-safe cleanup.
 
-## [0.2.2] - 2026-08-30
+## 0.2.2 - 2026-08-30
 
 ### Added
 
@@ -92,7 +92,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Added neutral copy-ready command examples that use `example.com` and contain no production server address or real credentials.
 - Added permanent deletion of revoked PrusaSlicer integration-token records; active tokens must be revoked first.
 
-## [0.2.1] - 2026-08-30
+## 0.2.1 - 2026-08-30
 
 ### Fixed
 
@@ -101,7 +101,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Widened the main content area and improved the Users layout, table wrapping, and action visibility.
 - Replaced SMTP and per-user notification checkboxes with accessible on/off switches.
 
-## [0.2.0] - 2026-08-30
+## 0.2.0 - 2026-08-30
 
 ### Added
 
@@ -116,7 +116,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Backups now include notification preferences and print-job history while excluding SMTP passwords and integration tokens; older backups remain restorable.
 - Server discovery now advertises print-job and email-notification capabilities.
 
-## [0.1.22] - 2026-08-30
+## 0.1.22 - 2026-08-30
 
 ### Added
 
@@ -130,7 +130,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Storage-location names are now buttons linking to the corresponding detail page for every signed-in role.
 - Added complete Czech and English translations and responsive layouts for the expanded warehouse views.
 
-## [0.1.21] - 2026-08-29
+## 0.1.21 - 2026-08-29
 
 ### Fixed
 
@@ -138,7 +138,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Failed web updates now return to Settings with the specific failure reason instead of showing a generic HTTP 500 page.
 - Unsafe release archive diagnostics now identify the rejected entry while retaining path-traversal protection.
 
-## [0.1.20] - 2026-08-29
+## 0.1.20 - 2026-08-29
 
 ### Added
 
@@ -146,7 +146,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Documented the recommended material, storage location, spool, printer, loading, weight-update, and unloading workflow directly in the web interface.
 - Added concise definitions of the inventory entities and notes about planned G-code/slicer consumption imports and pending physical OpenPrintTag verification.
 
-## [0.1.19] - 2026-08-28
+## 0.1.19 - 2026-08-28
 
 ### Added
 
@@ -158,45 +158,45 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Mobile synchronization no longer overwrites the server-specific printer order.
 - Updated the README and API/update guides with the application logo, linked Google Play badge, current synchronization behavior, independent server/mobile ordering, and cross-repository documentation links.
 
-## [0.1.18] - 2026-08-28
+## 0.1.18 - 2026-08-28
 
 ### Changed
 
 - Removed fractional seconds from device activity, user sign-in, and audit timestamps in the web interface while retaining full database precision.
 
-## [0.1.17] - 2026-08-28
+## 0.1.17 - 2026-08-28
 
 ### Fixed
 
 - Synchronization conflicts now include the client mutation ID and originally requested entity ID so mobile clients can retain the exact pending change when a natural key resolves to an existing server record.
 
-## [0.1.16] - 2026-08-28
+## 0.1.16 - 2026-08-28
 
 ### Fixed
 
 - Mobile upserts now reuse an existing empty printer slot with the same printer and slot number instead of failing its unique constraint when the phone generated a new slot UUID.
 - A genuinely occupied matching slot is returned as a synchronization conflict rather than an internal server error.
 
-## [0.1.15] - 2026-08-28
+## 0.1.15 - 2026-08-28
 
 ### Added
 
 - Added an administrator-only diagnostics card showing the latest server exception log entries with request IDs; all output is HTML-escaped and authentication tokens are never logged.
 
-## [0.1.14] - 2026-08-28
+## 0.1.14 - 2026-08-28
 
 ### Fixed
 
 - Quoted the synchronization cursor column in all SQL statements for compatibility with MariaDB/MySQL variants where `sequence` conflicts with SQL syntax, preventing HTTP 500 responses from the snapshot endpoint.
 
-## [0.1.13] - 2026-08-28
+## 0.1.13 - 2026-08-28
 
 ### Fixed
 
 - Bearer authentication now works on Apache/FastCGI hosting configurations that expose the `Authorization` header as `REDIRECT_HTTP_AUTHORIZATION` or otherwise omit `HTTP_AUTHORIZATION`.
 - Both supported web-root layouts explicitly preserve the Authorization header during URL rewriting, preventing freshly issued access tokens from being rejected by protected API endpoints.
 
-## [0.1.12] - 2026-08-28
+## 0.1.12 - 2026-08-28
 
 ### Added
 
@@ -210,7 +210,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Versioned stylesheet URLs now invalidate the browser cache after a server update.
 - The connected-device card reliably spans the full Settings width and keeps wide tables inside a horizontal scroll container on small screens.
 
-## [0.1.11] - 2026-08-28
+## 0.1.11 - 2026-08-28
 
 ### Added
 
@@ -223,7 +223,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Device refresh tokens remain stable until expiration, logout, or administrator revocation while short-lived access tokens continue to be renewed. This prevents a lost or overlapping refresh response from disconnecting the mobile application.
 - Replaced the obsolete planned-release section in README with the implemented feature set.
 
-## [0.1.10] - 2026-08-28
+## 0.1.10 - 2026-08-28
 
 ### Fixed
 
@@ -233,7 +233,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Documented the mobile application's first-connection, offline-queue, and bidirectional synchronization workflow.
 
-## [0.1.9] - 2026-08-28
+## 0.1.9 - 2026-08-28
 
 ### Added
 
@@ -242,7 +242,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Status badges and crossed-out, muted printer cards for every non-operational state on the dashboard.
 - Database migration and synchronization validation for the expanded printer states.
 
-## [0.1.8] - 2026-08-28
+## 0.1.8 - 2026-08-28
 
 ### Changed
 
@@ -254,7 +254,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Newly published releases no longer remain hidden on the dashboard for up to six hours after an earlier up-to-date check.
 
-## [0.1.7] - 2026-08-28
+## 0.1.7 - 2026-08-28
 
 ### Added
 
@@ -266,7 +266,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - The application icon and FilamentManager name now form a single home-page link.
 - Footer content is arranged into separate server and mobile-application rows.
 
-## [0.1.6] - 2026-08-28
+## 0.1.6 - 2026-08-28
 
 ### Added
 
@@ -285,7 +285,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Backup restore now validates every imported column against the live database schema, preventing SQL identifier injection from modified backup archives.
 - Backup restore limits manifest, per-entry, and total uncompressed archive sizes.
 
-## [0.1.5] - 2026-08-28
+## 0.1.5 - 2026-08-28
 
 ### Added
 
@@ -301,7 +301,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Backup deletion requires administrator access, CSRF validation, and a strictly validated backup filename.
 
-## [0.1.4] - 2026-08-28
+## 0.1.4 - 2026-08-28
 
 ### Added
 
@@ -313,7 +313,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Creating a root storage location no longer triggers the self-parent validation and a subsequent 404 page.
 
-## [0.1.3] - 2026-08-27
+## 0.1.3 - 2026-08-27
 
 ### Added
 
@@ -330,7 +330,7 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 - Show storage-location and loaded-spool deletion conflicts as translated flash notices.
 
-## [0.1.2] - 2026-08-27
+## 0.1.2 - 2026-08-27
 
 ### Added
 
@@ -346,14 +346,14 @@ All notable changes to FilamentManager Server are documented in this file. The f
 - Recalculate cached update availability on every dashboard request so the installed release is never advertised as newer.
 - Generate subdirectory-aware asset URLs for error layouts.
 
-## [0.1.1] - 2026-08-27
+## 0.1.1 - 2026-08-27
 
 ### Fixed
 
 - Recalculate cached update availability against the installed version and clear the cache after a successful update.
 - Keep internal application-file rollback archives out of the database-backup restore list.
 
-## [0.1.0] - 2026-08-27
+## 0.1.0 - 2026-08-27
 
 ### Added
 

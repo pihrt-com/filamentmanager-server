@@ -11,7 +11,7 @@ use ZipArchive;
 final class BackupService
 {
     private const CORE_TABLES = ['workspaces','users','devices','manufacturers','materials','locations','spools','printers','printer_slots','spool_movements','settings','sync_changes','audit_log'];
-    private const OPTIONAL_TABLES = ['user_notification_settings','notification_states','mail_queue','print_jobs','print_job_consumptions'];
+    private const OPTIONAL_TABLES = ['manufacturer_aliases','user_notification_settings','notification_states','mail_queue','print_jobs','print_job_consumptions'];
     private const TABLES = [...self::CORE_TABLES,...self::OPTIONAL_TABLES];
     public function __construct(private readonly App $app) {}
 

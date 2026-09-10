@@ -4,6 +4,10 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+### Fixed — 2026-09-10
+
+- Server sync reuses existing manufacturer names without overwriting metadata. Persistent workspace-scoped aliases repair material references across batches/retries, including pending changes from older apps. Apply migration 008 before serving sync requests. Deleted manufacturer names return HTTP 409. Backup/restore includes aliases.
+
 ## [0.2.8] - 2026-09-10
 
 ### Changed

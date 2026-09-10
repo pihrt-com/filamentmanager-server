@@ -4,6 +4,8 @@ All notable changes to FilamentManager Server are documented in this file. The f
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-09-10
+
 ### Changed
 
 - Material selection when creating or editing a spool now shows manufacturer, material type, color, commercial name, and diameter.

@@ -28,11 +28,18 @@ Start with this server README for hosting, administration, API, backup, and upda
 - Optional PrusaSlicer post-processing helper with restricted, revocable integration tokens
 - Per-user email alerts for empty or low-weight spools, unavailable or low-count materials, and full storage locations, backed by encrypted SMTP settings and a retrying queue
 - Versioned REST API v1 with device authorization, offline synchronization, idempotent mutations, and conflict detection
+- Android Restore Credentials support with single-use WebAuthn challenges, ES256 verification, replay protection, and Google Play signing-origin validation
 - Connected mobile-device overview with one stable record per app installation, immediate administrator-controlled token revocation, and cleanup of revoked devices
 - Portable database and application-data backup and restore
 - GitHub Release update checks, SHA-256 package verification, automatic pre-update backup, migrations, and application-file rollback
 
 ## Recent changes
+
+### 2026-11-22 — GitHub/filamentmanager-server
+
+- Added Restore Credentials endpoints for transferring an optional mobile server sign-in to a new Android phone.
+- Added WebAuthn credential storage, strict relying-party and Google Play origin validation, signature counters, and replay-resistant challenges.
+- Kept restore credentials and challenges out of portable backups together with other authentication secrets.
 
 ### 2026-09-10 — GitHub/filamentmanager-server
 
@@ -85,7 +92,7 @@ Text `.gcode` and Prusa binary `.bgcode` files can be imported under Print jobs.
 
 ## REST API and synchronization
 
-The API is versioned under `/api/v1`. Mobile clients receive short-lived access tokens and a revocable refresh token scoped to the signed-in device. Initial synchronization uses a snapshot; subsequent synchronization uses a monotonic change cursor, client-generated UUIDs, idempotent mutation IDs, optimistic record versions, tombstones, and explicit conflict results. See [API](docs/API.md).
+The API is versioned under `/api/v1`. Mobile clients receive short-lived access tokens and a revocable refresh token scoped to the signed-in device. Compatible Android clients can also register a Restore Credential so an optional server sign-in can be restored after transfer to a new phone without storing the password. Initial synchronization uses a snapshot; subsequent synchronization uses a monotonic change cursor, client-generated UUIDs, idempotent mutation IDs, optimistic record versions, tombstones, and explicit conflict results. See [API](docs/API.md).
 
 Printer inventory and operational states synchronize in both directions. The web dashboard's A–Z, Z–A, or custom printer order is a server display preference and is intentionally not overwritten by the phone's independent A–Z, Z–A, or drag-and-drop order. The mobile app exposes connection state through its cloud indicator and can trigger synchronization by pulling down on the printer overview.
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 - 2026-11-22
+
+### Added
+
+- Added Android Restore Credentials registration and authentication endpoints for transferring an optional mobile sign-in to a new phone.
+- Added WebAuthn challenge storage, P-256/ES256 signature verification, replay protection, signature-counter validation, and strict Google Play signing-origin validation.
+- Added migration 009 for restore credentials and short-lived single-use WebAuthn challenges.
+- Added cryptographic regression tests covering credential registration, authentication, challenge replay rejection, and untrusted Android signing origins.
+
+### Security
+
+- Restore credentials are scoped to the `pihrt.com` relying party and the Filament Manager Google Play signing certificate published through Digital Asset Links.
+- Restore credentials and challenges remain excluded from portable server backups together with other authentication secrets.
+
 ## 0.2.9 - 2026-09-10
 
 - Fixed duplicate manufacturer errors when synchronizing newly created spools.

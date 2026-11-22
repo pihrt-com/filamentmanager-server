@@ -16,6 +16,14 @@ Mobile clients store the refresh token in Android secure storage. The user's pas
 
 `POST /api/v1/auth/logout` accepts `refreshToken` and revokes active tokens for that device.
 
+### Android Restore Credentials
+
+`POST /api/v1/auth/restore/registration/options` requires a valid access-token Bearer header and returns WebAuthn creation JSON in `requestJson` together with the stable `userId` needed after device transfer. `POST /api/v1/auth/restore/registration/complete` accepts the Credential Manager response in `credential` and stores its P-256 public key after validating the challenge, relying party, user-presence flag, and Android signing origin.
+
+`POST /api/v1/auth/restore/authentication/options` accepts the backed-up `userId` and returns WebAuthn assertion JSON in `requestJson`. `POST /api/v1/auth/restore/authentication/complete` accepts `userId`, `credential`, `deviceName`, `appVersion`, and the installation's stable `deviceId`. After challenge, origin, relying-party, signature, and counter validation, it returns a fresh access/refresh token pair and user profile in the same format as password sign-in.
+
+Restore challenges expire after five minutes and are single-use. Credentials are scoped to the `pihrt.com` relying party and the Filament Manager Google Play signing certificate published in `https://pihrt.com/.well-known/assetlinks.json`. Restore credentials and challenges are authentication secrets and are intentionally excluded from portable server backups.
+
 ## Initial synchronization
 
 `GET /api/v1/snapshot` returns the current cursor and all active printers, slots, manufacturers, materials, spools, and locations for the authenticated workspace.
